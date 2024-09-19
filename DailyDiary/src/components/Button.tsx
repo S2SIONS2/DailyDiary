@@ -1,11 +1,15 @@
-import './Button.scss'
+import './Button.scss';
 
-const Button = () => {
+const Button = ({ text, type, onClick }) => {
     return (
-        <div className='Button'>
-            <button type='button'>버튼</button>
-        </div>
-    )
+        <button
+            type='button'
+            onClick={onClick}
+            className={`Button Button_${type}`}
+        >
+            {text}
+        </button>
+    );
 }
 
 export default Button;

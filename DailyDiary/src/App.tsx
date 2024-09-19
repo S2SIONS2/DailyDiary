@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
 import './reset.css'
+import Button from './components/Button'
 import { Link, Outlet } from 'react-router-dom'
 import { useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,9 +12,11 @@ function App() {
 
   return (
     <div className="App">
-      <button type="button" onClick={() => setNav(true)}>
-        <FontAwesomeIcon icon={faBars} />
-      </button>
+      <Button 
+        text={<FontAwesomeIcon icon={faBars} />}
+        onClick={() => setNav(true)} 
+        type={"confirm"}
+      />
       {
         nav && (
           <nav>
