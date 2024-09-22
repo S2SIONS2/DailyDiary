@@ -22,15 +22,20 @@ const initialState: BookState = {
   status: 'idle',
 };
 
+type searchParams = {
+    bookTitle: string,
+    currentPage: number
+}
+
 // 비동기 액션 생성
 export const fetchBooks = createAsyncThunk(
   'books/fetchBooks',
-  async ( bookTitle: string ) => {
+  async ( {bookTitle, currentPage}: searchParams ) => {
     const response = await axios.get('/book.json', {
       params: { 
         query: bookTitle,
-        display : 10,
-        start : 1
+        display : 3,
+        start : currentPage
      },
       headers: {
         'X-Naver-Client-Id': import.meta.env.VITE_BOOK_API_ID,

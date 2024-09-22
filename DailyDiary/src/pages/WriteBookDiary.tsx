@@ -5,8 +5,8 @@ import { RootState, AppDispatch } from '../../src/app/store';
 import { fetchBooks } from '../features/api/BookSlice';
 
 const WriteBookDiary: React.FC = () => {
-    const bookList = useSelector((state: RootState) => state.books.bookList)
-    const status = useSelector((state: RootState) => state.books.status)
+    const bookList = useSelector((state: RootState) => state.books.bookList) // api list
+    const status = useSelector((state: RootState) => state.books.status) // api list status
     const dispatch = useDispatch<AppDispatch>();
     
     const [ bookTitle, setBookTitle ] =useState('') // 책 제목
@@ -15,40 +15,32 @@ const WriteBookDiary: React.FC = () => {
 
     // 책 제목 입력
     const handleBookTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setBookTitle(e.target.value);
-        dispatch(fetchBooks(e.target.value)); 
+        const inputBookTitle = (e.target.value)
+        setBookTitle(inputBookTitle);
+        dispatch(fetchBooks({bookTitle: inputBookTitle, currentPage})); 
     };
-    // 책 제목을 fetchBooks에 전달
+    // 책 제목, start값을 fetchBooks에 전달
     const handleSearch = () => {
-        dispatch(fetchBooks(bookTitle)); 
+        dispatch(fetchBooks({bookTitle, currentPage}));
     };
 
     // 책 갯수 3개씩 페이징
-    const total = useSelector((state: RootState) => state.books.totalBookList);
-    const [ currentPage, setCurrentPage ] = useState(1);
-    const pageLastItem = currentPage * 3; 
-    const pageFirstItem = pageLastItem - 3;
-    const currentItem = bookList.slice(pageFirstItem, pageLastItem) // 현재 보일 리스트
-
-    // const pageNumbers = [];
-    // for (let i = 1; i <= Math.ceil(bookList.length / 3); i++) {
-    //     pageNumbers.push(i);
-    // }
-
+    const [ currentPage, setCurrentPage ] = useState(1); // api start 위치
+    const [ presentPage, setPresentPage] = useState(1) // 현재 리스트 페이지
     const handlePreBtn = (pageNumber: number) => {
         setCurrentPage(currentPage - pageNumber)
-        // console.log(currentPage)
+        setPresentPage(presentPage - 1)
     } 
     const handleNextBtn = (pageNumber: number) => {
         setCurrentPage(currentPage + pageNumber)
-        // console.log(currentPage)
+        setPresentPage(presentPage + 1)
     }    
 
     useEffect(() => {
         if(status === 'idle') {
-            dispatch(fetchBooks(bookTitle))
+            dispatch(fetchBooks({ bookTitle, currentPage }))
         }
-    }, [bookTitle]) // dispatch, status
+    }, [bookTitle, currentPage]) // dispatch, status
     
 
     // 책 저자 입력
@@ -82,27 +74,29 @@ const WriteBookDiary: React.FC = () => {
                 {
                     status === 'loading' && <Loading />
                 }
-                {currentItem.map((book) => (
-                    <li key={book.isbn} className='border border-1 p-2 row flex-nowrap'>
-                        <img src={book.image} alt={book.title} style={{ width: '100px', height: 'auto' }} />
-                        <div className='row flex-grow-1'>
-                            <h5 className='mb-1 row align-items-center'>{book.title}</h5>
-                            <p className='mb-1 row align-items-center'>{book.author}</p>
-                        </div>
-                    </li>
-                ))}
                 {
-                    currentItem && (
+                    bookList.map((book) => (
+                        <li key={book.isbn} className='border border-1 p-2 row flex-nowrap cursor-pointer'>
+                            <img src={book.image} alt={book.title} style={{ width: '100px', height: 'auto' }} />
+                            <div className='row flex-grow-1'>
+                                <h5 className='mb-1 row align-items-center'>{book.title}</h5>
+                                <p className='mb-1 row align-items-center'>{book.author}</p>
+                            </div>
+                        </li>
+                    ))
+                }
+                {
+                    bookList && (
                         <div className='row align-items-center justify-content-center'>
                             <button
-                                onClick={() => handlePreBtn(1)}
+                                onClick={() => handlePreBtn(3)}
                                 className='w-auto m-0 g-0'
                             >
                                 -
                             </button>
-                            <p className='w-auto m-0 g-0'>{currentPage}</p>
+                            <p className='w-auto m-0 g-0'>{presentPage}</p>
                             <button
-                                onClick={() => handleNextBtn(1)}
+                                onClick={() => handleNextBtn(3)}
                                 className='w-auto m-0 g-0'
                             >
                                 +
