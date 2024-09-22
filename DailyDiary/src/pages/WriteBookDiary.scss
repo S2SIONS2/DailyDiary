@@ -1,0 +1,21 @@
+.WriteBookDiary{
+    // border: 1px solid #cbcbcb;
+
+    .booklist .imgArea{
+        width: 70px;
+        margin-right: 10px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        img{
+            height: 100%;
+            max-height: calc((70px - 2px)* 1.618 - 10px);
+        }
+    }
+
+    .booklist .imgArea + div {
+        width: calc(100% - 80px);
+    }
+}
