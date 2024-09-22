@@ -1,23 +1,37 @@
-// src/features/api/BookSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+interface Book {
+    title: string,
+    author: string,
+    description : string,
+    image : string,
+    link : string,
+    isbn: number,
+}
+
 interface BookState {
-  bookList: any[];
+  bookList: Book[];
+  totalBookList: number;
   status: 'idle' | 'loading' | 'failed';
 }
 
 const initialState: BookState = {
   bookList: [],
+  totalBookList: 0,
   status: 'idle',
 };
 
 // 비동기 액션 생성
 export const fetchBooks = createAsyncThunk(
   'books/fetchBooks',
-  async () => {
+  async ( bookTitle: string ) => {
     const response = await axios.get('/book.json', {
-      params: { query: '사랑' },
+      params: { 
+        query: bookTitle,
+        display : 10,
+        start : 1
+     },
       headers: {
         'X-Naver-Client-Id': import.meta.env.VITE_BOOK_API_ID,
         'X-Naver-Client-Secret': import.meta.env.VITE_BOOK_API_PW
@@ -38,6 +52,7 @@ const bookSlice = createSlice({
       })
       .addCase(fetchBooks.fulfilled, (state, action) => { // 비동기 액션인 fetchBooks가 성공적으로 완료되었을 때 상태
         state.status = 'idle';
+        state.totalBookList = action.payload.total
         state.bookList = action.payload.items;
       })
       .addCase(fetchBooks.rejected, (state) => { // fetchBooks가 실패했을 때
