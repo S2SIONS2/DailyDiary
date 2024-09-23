@@ -1,30 +1,32 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import './App.css';
-// import Button from './components/Button'
-import { Outlet } from 'react-router-dom'
-// import { useState } from 'react'
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import { faBars } from "@fortawesome/free-solid-svg-icons";
+import Button from './components/Button'
+import { Outlet, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 function App() {
-  // const [nav, setNav] = useState(false)
+  const [nav, setNav] = useState(false)
 
   return (
-    <div className="App">
-      {/* <div className="row justify-content-end w-auto">
+    <div className="App position-relative">
+      <div className="row justify-content-end w-auto m-0 p-0">
         <Button 
           text={<FontAwesomeIcon icon={faBars} />}
-          onClick={() => setNav(true)} 
+          onClick={() => setNav(!nav)} 
           type={"confirm"}
         />
-      </div> */}
-      {/* {
+      </div>
+      {
         nav && (
-          <nav>
-            <Link to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
+          <nav className="row w-100 h-100 mt-2 border border-1 border-warning">
+            <div className="h-auto mt-2">
+              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
+            </div>
           </nav>
         )
-      } */}
+      }
       <div className="content">
         <Outlet />
       </div>

@@ -7,7 +7,7 @@ interface Book {
     description : string,
     image : string,
     link : string,
-    isbn: number,
+    isbn: string,
 }
 
 interface BookState {

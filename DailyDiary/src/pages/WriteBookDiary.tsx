@@ -20,7 +20,8 @@ const WriteBookDiary: React.FC = () => {
     const [ bookTitle, setBookTitle ] =useState('') // 책 제목
     const [ author, setAuthor ] =useState('') // 책 저자
     const [ description, setDescription ] =useState('') // 책 줄거리
-    const [ bookImg, setBookImg] = useState('')
+    const [ bookImg, setBookImg] = useState('') // 책 이미지
+    const [ isbn, setIsbn ] = useState('')
 
     // 책 제목 입력
     const handleBookTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,12 +77,14 @@ const WriteBookDiary: React.FC = () => {
     type bookInfo = {
         title: string,
         author: string,
-        image: string
+        image: string,
+        isbn: string
     }
     const saveItemInfo = (book: bookInfo) => {
         setBookTitle(book.title)
         setAuthor(book.author)
         setBookImg (book.image)
+        setIsbn(book.isbn)
     } 
 
     // db.json에 코드 담기 
@@ -92,10 +95,11 @@ const WriteBookDiary: React.FC = () => {
                 title: bookTitle,
                 author: author,
                 image: bookImg,
-                description: description 
+                description: description,
+                isbn: isbn
             }
             const response = await axios.post(url, params)
-            if(response.data.code === 200) {
+            if(response.status === 201) {
                 navigate('/app/bookdiary')
             }
         }catch(error) {
@@ -109,9 +113,9 @@ const WriteBookDiary: React.FC = () => {
 
     return (
         <div className="WriteBookDiary p-2">
-            <section className='row m-0 mb-3'>
-                <h4>책 제목</h4>
-                <p className='text-muted'>책 검색 후 기록할 책을 클릭 하시면 더욱 간편하게 작성이 가능합니다.</p>
+            <section className='row m-0 mb-3 pb-3 border-bottom'>
+                <h4 className='p-0'>책 제목</h4>
+                <p className='text-muted p-0'>책 검색 후 기록할 책을 클릭 하시면 더욱 간편하게 작성이 가능합니다.</p>
                 <input type='text' className='w-auto me-2 flex-grow-1' value={bookTitle} onChange={handleBookTitle}/>
                 <button className='w-auto' onClick={handleSearch}>Search</button>
             </section>
@@ -123,7 +127,7 @@ const WriteBookDiary: React.FC = () => {
                             onClick={() => saveItemInfo(book)}
                         >                            
                             <div className='imgArea m-0 p-0'>
-                                <img src={book.image} alt={book.title} />
+                                <img src={book.image} alt={book.title} />                                
                             </div>
                             <div className='row p-0 m-0'>
                                 <h5 className='mb-1 row align-items-center p-0 m-0'>{book.title}</h5>
@@ -152,12 +156,12 @@ const WriteBookDiary: React.FC = () => {
                     )
                 }
             </ul>
-            <section className='row m-0 mb-3'>
-                <h4>저자</h4>
+            <section className='row m-0 mb-3 pb-3 border-bottom'>
+                <h4 className='p-0'>저자</h4>
                 <input type='text' className='w-auto flex-grow-1' value={author} onChange={handleAuthor}/>
             </section>
             <section className='row m-0 mb-3'>
-                <h4>독후감</h4>
+                <h4 className='p-0'>독후감</h4>
                 <textarea className='w-auto flex-grow-1' value={description} onChange={handleDescription}/>
             </section>
             <section className='row align-items-center justify-content-center gap-2 m-0 mb-3'>
