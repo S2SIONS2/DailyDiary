@@ -5,7 +5,7 @@ const Button = ({ text, type, onClick }) => {
         <button
             type='button'
             onClick={onClick}
-            className={`Button Button_${type}`}
+            className={`Button Button_${type} m-0 g-0`}
         >
             {text}
         </button>

@@ -31,18 +31,20 @@ type searchParams = {
 export const fetchBooks = createAsyncThunk(
   'books/fetchBooks',
   async ( {bookTitle, currentPage}: searchParams ) => {
-    const response = await axios.get('/book.json', {
-      params: { 
-        query: bookTitle,
-        display : 3,
-        start : currentPage
-     },
-      headers: {
-        'X-Naver-Client-Id': import.meta.env.VITE_BOOK_API_ID,
-        'X-Naver-Client-Secret': import.meta.env.VITE_BOOK_API_PW
-      }
-    });
-    return response.data;
+    if(bookTitle) {
+        const response = await axios.get('/book.json', {
+          params: { 
+            query: bookTitle,
+            display : 3,
+            start : currentPage
+         },
+          headers: {
+            'X-Naver-Client-Id': import.meta.env.VITE_BOOK_API_ID,
+            'X-Naver-Client-Secret': import.meta.env.VITE_BOOK_API_PW
+          }
+        });
+        return response.data;
+    }
   }
 );
 
@@ -57,8 +59,14 @@ const bookSlice = createSlice({
       })
       .addCase(fetchBooks.fulfilled, (state, action) => { // 비동기 액션인 fetchBooks가 성공적으로 완료되었을 때 상태
         state.status = 'idle';
-        state.totalBookList = action.payload.total
-        state.bookList = action.payload.items;
+        if (action.payload && action.payload.total !== undefined && action.payload.items) {
+            state.totalBookList = action.payload.total;
+            state.bookList = action.payload.items;
+        } else {
+        // 데이터를 받지 못했거나 구조가 다를 때 기본값 설정
+            state.totalBookList = 0;
+            state.bookList = [];
+        }
       })
       .addCase(fetchBooks.rejected, (state) => { // fetchBooks가 실패했을 때
         state.status = 'failed';

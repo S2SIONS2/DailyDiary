@@ -12,16 +12,16 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
 
 const WriteBookDiary: React.FC = () => {
-    const navigate = useNavigate();
     const bookList = useSelector((state: RootState) => state.books.bookList) // api list
     const status = useSelector((state: RootState) => state.books.status) // api list status
     const dispatch = useDispatch<AppDispatch>();
     
+    const navigate = useNavigate();
     const [ bookTitle, setBookTitle ] =useState('') // 책 제목
     const [ author, setAuthor ] =useState('') // 책 저자
     const [ description, setDescription ] =useState('') // 책 줄거리
     const [ bookImg, setBookImg] = useState('') // 책 이미지
-    const [ isbn, setIsbn ] = useState('')
+    const [ isbn, setIsbn ] = useState('') // 책 isbn(바코드) 값
 
     // 책 제목 입력
     const handleBookTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +119,7 @@ const WriteBookDiary: React.FC = () => {
                 <input type='text' className='w-auto me-2 flex-grow-1' value={bookTitle} onChange={handleBookTitle}/>
                 <button className='w-auto' onClick={handleSearch}>Search</button>
             </section>
-            <ul className='row list-ul p-0 m-0'>
+            <ul className='row list-ul p-0 m-0 mb-3'>
                 {
                     bookList.map((book) => (
                         <li key={book.isbn} 
@@ -138,7 +138,7 @@ const WriteBookDiary: React.FC = () => {
                 }
                 {
                     bookList.length != 0 && (
-                        <div className='row align-items-center justify-content-center mt-3 gap-2'>
+                        <div className='row align-items-center justify-content-center mt-3 mb-3 gap-2'>
                             <Button 
                                 text={<FontAwesomeIcon icon={faChevronLeft} />}
                                 type={"button"}

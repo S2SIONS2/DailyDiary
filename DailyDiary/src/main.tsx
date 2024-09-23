@@ -8,6 +8,7 @@ import WriteBookDiary from './pages/WriteBookDiary.tsx'
 import NoData from './pages/NoData.tsx'
 import NotFound from './pages/NotFound.tsx'
 import Loading from './pages/Loading.tsx'
+import BookDetail from './pages/BookDetail.tsx'
 
 import { Provider } from 'react-redux';
 import { store } from './app/store.ts';
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
           <Route index element={<BookDiary />} />
           <Route path='bookdiary' element={<BookDiary />} />
           <Route path='writebookdiary' element={<WriteBookDiary />} />
+          <Route path='bookdetail' element={<BookDetail />} />
         </Route>
         <Route path='/nodata' element={<NoData />} />
         <Route path='/loading' element={<Loading />} />
