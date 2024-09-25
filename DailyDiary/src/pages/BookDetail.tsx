@@ -33,12 +33,14 @@ const BookDetail = () => {
     const confirmBtn = async () => {
         try{
             const url = 'http://localhost:3000/book?isbn=' + userInfo.isbn;
+            console.log(url)
             const params = {
                 // isbn: userInfo.isbn,
                 title: bookTitle,
                 author: author,
                 description: description,
             }
+            console.log(params)
             const response = await axios.put(url, params)
             if(response.status === 201) {
                 navigate('/app/bookdiary')
@@ -53,8 +55,24 @@ const BookDetail = () => {
     }
 
     // remove 버튼
-    const removeBtn = () => {
-        alert('삭제 버튼')
+    const removeBtn = async () => {
+        try{
+            const url = 'http://localhost:3000/book?isbn=' + userInfo.isbn;
+            const params = {
+                // isbn: userInfo.isbn,
+                title: bookTitle,
+                author: author,
+                description: description,
+            }
+            const response = await axios.delete(url, {
+                params : params
+            })
+            if(response.status === 201) {
+                navigate('/app/bookdiary')
+            }
+        }catch(error) {
+            console.error(error)
+        }
     }
 
     return(
@@ -77,7 +95,7 @@ const BookDetail = () => {
             </section>
             <section className='row m-0 mb-3'>
                 <h4 className='p-0'>독후감</h4>
-                <textarea className='w-auto flex-grow-1' value={userInfo.description} onChange={handleDescription}/>
+                <textarea className='w-auto flex-grow-1' value={description} onChange={handleDescription}/>
             </section>
             <section className='row align-items-center justify-content-center gap-2 m-0 mb-3'>
                 <Button

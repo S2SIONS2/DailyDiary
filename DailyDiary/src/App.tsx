@@ -11,7 +11,10 @@ function App() {
 
   return (
     <div className="App position-relative">
-      <div className="row justify-content-end w-auto m-0 p-0">
+      <div className="row justify-content-between w-auto m-0 p-0">
+        <h1 className="w-auto">
+          <a href="/app">My Diary</a>
+        </h1>
         <Button 
           text={<FontAwesomeIcon icon={faBars} />}
           onClick={() => setNav(!nav)} 
@@ -20,7 +23,7 @@ function App() {
       </div>
       {
         nav && (
-          <nav className="row w-100 h-100 mt-2 border border-1 border-warning">
+          <nav className="row w-100 h-100 mt-2 border border-2 border-warning">
             <div className="h-auto mt-2">
               <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
             </div>

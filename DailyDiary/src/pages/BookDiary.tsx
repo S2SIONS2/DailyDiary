@@ -33,15 +33,15 @@ const BookDiary: React.FC = () => {
         getApi()
     }, [])
 
-    // type bookInfo = {
-    //     title: string,
-    //     author: string,
-    //     image: string,
-    //     description: string,
-    //     id: string,
-    //     isbn: string
-    // }
-    const bookDetail = (item) => {
+    type bookInfo = {
+        title: string,
+        author: string,
+        image: string,
+        description: string,
+        id: string,
+        isbn: string
+    }
+    const bookDetail = (item: bookInfo) => {
         navigate('/app/bookdetail', {
             state: {
               title: item.title,
@@ -52,7 +52,6 @@ const BookDiary: React.FC = () => {
               isbn: item.isbn
             },
           });
-        console.log(item)
     }
     
     return (
@@ -68,8 +67,7 @@ const BookDiary: React.FC = () => {
                     {
                         list.map((item) => (
                             <li key={item.isbn} 
-                                className='border-bottom p-2 pb-3 g-0 row flex-nowrap cursor-pointer booklist'
-                                onClick={() => bookDetail(item)}
+                                className='border-bottom p-2 pb-3 g-0 row flex-nowrap position-relative booklist'
                             >
                                 <div className='imgArea m-0 p-0'>
                                     <img src={item.image} alt={item.title} />                                
@@ -78,6 +76,10 @@ const BookDiary: React.FC = () => {
                                     <h5 className='mb-1 row align-items-center p-0 m-0'>{item.title}</h5>
                                     <p className='mb-1 row align-items-center p-0 m-0'>{item.author}</p>
                                 </div>
+                                <button
+                                    className='position-absolute end-0'
+                                    type='button'
+                                    onClick={() => bookDetail(item)}> 수정</button>
                             </li>        
                         ))
                     }
