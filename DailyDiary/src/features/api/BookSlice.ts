@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// naver 책 검색 api
 interface Book {
     title: string,
     author: string,

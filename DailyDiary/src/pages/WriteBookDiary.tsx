@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../src/app/store';
 import { fetchBooks } from '../features/api/BookSlice';
+import { addList } from '../features/api/BookListSlice';
 import axios from 'axios'
 import Button from '../components/Button';
 
@@ -12,8 +13,9 @@ import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from 'react-router-dom';
 
 const WriteBookDiary: React.FC = () => {
-    const bookList = useSelector((state: RootState) => state.books.bookList) // api list
-    const status = useSelector((state: RootState) => state.books.status) // api list status
+    const bookList = useSelector((state: RootState) => state.books.bookList) // api search list
+    const status = useSelector((state: RootState) => state.books.status) // api search list status
+
     const dispatch = useDispatch<AppDispatch>();
     
     const navigate = useNavigate();
@@ -87,10 +89,14 @@ const WriteBookDiary: React.FC = () => {
         setIsbn(book.isbn)
     } 
 
-    // db.json에 코드 담기 
+    // Book API에 정보 저장
+    const confirmBtn2 = async () => {
+        dispatch(addList({ bookTitle, author, bookImg, description, isbn }));
+        navigate('/app/bookdiary')  
+    }
     const confirmBtn = async () => {
         try{
-            const url = 'http://localhost:3000/book';
+            const url = 'http://175.212.136.236:8081/book';
             const params = {
                 title: bookTitle,
                 author: author,
@@ -173,6 +179,11 @@ const WriteBookDiary: React.FC = () => {
                 <Button
                     text={'저장'}
                     onClick={() => confirmBtn()}
+                    type={"confirm"}
+                />
+                <Button
+                    text={'임시 저장'}
+                    onClick={() => confirmBtn2()}
                     type={"confirm"}
                 />
             </section>

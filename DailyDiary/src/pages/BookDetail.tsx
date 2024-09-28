@@ -32,7 +32,8 @@ const BookDetail = () => {
     // db.json에 코드 수정 하기 
     const confirmBtn = async () => {
         try{
-            const url = 'http://localhost:3000/book?isbn=' + userInfo.isbn;
+            //const url = 'http://localhost:3000/book?id=' + userInfo.isbn;
+            const url = 'http://175.212.136.236:8081/book';
             console.log(url)
             const params = {
                 // isbn: userInfo.isbn,
@@ -57,7 +58,7 @@ const BookDetail = () => {
     // remove 버튼
     const removeBtn = async () => {
         try{
-            const url = 'http://localhost:3000/book?isbn=' + userInfo.isbn;
+            const url = '/api/book?isbn=' + userInfo.isbn;
             const params = {
                 // isbn: userInfo.isbn,
                 title: bookTitle,

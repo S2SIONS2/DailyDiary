@@ -1,37 +1,24 @@
+import { useDispatch, useSelector } from 'react-redux';
 import './BookDiary.scss';
-import { useEffect, useState } from 'react';
-import axios from 'axios'
-import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'
+import { fetchLists } from '../features/api/BookListSlice';
+import { RootState, AppDispatch } from '../../src/app/store';
+import { useEffect } from 'react';
+import Loading from './Loading';
+import NoData from './NoData';
+
 
 const BookDiary: React.FC = () => {
-    const navigate = useNavigate();
-    // api book list 타입 지정
-    interface Book {
-        id: string;
-        title: string;
-        author: string;
-        description: string;
-        image: string;
-        isbn: string;
-      }
-
-    const [list, setList] = useState<Book[]>([]);
-    const getApi = async () => {
-        try{
-            const url = 'http://localhost:3000/book';
-            const response = await axios.get(url)
-            if(response.status === 200) {
-                setList(response.data)
-            }
-        }catch(error){
-            console.error(error)
-        }
-    }
+    const {saveBookList, status} = useSelector((state: RootState) => state.lists)
+    const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
-        getApi()
-    }, [])
+        if (status === 'idle') {
+          dispatch(fetchLists());
+        }
+      }, []);
+
+    const navigate = useNavigate();
 
     type bookInfo = {
         title: string,
@@ -53,6 +40,19 @@ const BookDiary: React.FC = () => {
             },
           });
     }
+
+    // api list 로딩중일때
+    if (status === 'loading') {
+        return (
+            <Loading />
+        )
+    }
+    // api list 값이 없을 때
+    if (status === 'failed') {
+        return (
+            <NoData />
+        )
+    }
     
     return (
         <div className='BookDiary'>
@@ -65,7 +65,7 @@ const BookDiary: React.FC = () => {
             <section>
                 <ul className='m-0 p-0 g-0 border'>
                     {
-                        list.map((item) => (
+                        saveBookList.map((item) => (
                             <li key={item.isbn} 
                                 className='border-bottom p-2 pb-3 g-0 row flex-nowrap position-relative booklist'
                             >

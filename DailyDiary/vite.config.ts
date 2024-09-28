@@ -10,6 +10,11 @@ export default defineConfig({
         target: 'https://openapi.naver.com/v1/search',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '') // 경로 재작성
+      },
+      '/api/bookList': {
+        target: 'http://175.212.136.236:8081/book',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/api/bookList', '')
       }
     }
   }
