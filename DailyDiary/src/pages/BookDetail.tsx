@@ -1,9 +1,12 @@
 import Button from '../components/Button';
-import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react'
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../src/app/store';
+import { updateList } from '../features/api/BookListSlice';
+import { deleteBook } from '../features/api/BookListSlice';
 
-const BookDetail = () => {
+const BookDetail: React.FC = () => {
     const navigate = useNavigate();
     // 책 정보 받아오기
     const location = useLocation();
@@ -12,8 +15,7 @@ const BookDetail = () => {
     const [ bookTitle, setBookTitle ] =useState(userInfo.title || '') // 책 제목
     const [ author, setAuthor ] =useState(userInfo.author || '') // 책 저자
     const [ description, setDescription ] =useState(userInfo.description || '') // 책 줄거리
-    // const [ bookImg, setBookImg] = useState('') // 책 이미지
-    // const [ isbn, setIsbn ] = useState('') // 책 isbn(바코드) 값
+    const id = userInfo.id // 책 리스트 id 값
 
     // 책 제목 입력
     const handleBookTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,51 +31,20 @@ const BookDetail = () => {
         setDescription(e.target.value);
     };
 
-    // db.json에 코드 수정 하기 
-    const confirmBtn = async () => {
-        try{
-            //const url = 'http://localhost:3000/book?id=' + userInfo.isbn;
-            const url = 'http://175.212.136.236:8081/book';
-            console.log(url)
-            const params = {
-                // isbn: userInfo.isbn,
-                title: bookTitle,
-                author: author,
-                description: description,
-            }
-            console.log(params)
-            const response = await axios.put(url, params)
-            if(response.status === 201) {
-                navigate('/app/bookdiary')
-            }
-        }catch(error) {
-            console.error(error)
-        }
+    // api list 수정
+    const dispatch = useDispatch<AppDispatch>();
+    const updateBtn = async () => {
+        dispatch(updateList({ bookTitle, author, description, id }));
+        navigate('/app/bookdiary')  
     }
     // 닫기 버튼 클릭 시
     const cancleBtn = async () => {
         navigate('/app/bookdiary')
     }
-
-    // remove 버튼
+    // 삭제 버튼
     const removeBtn = async () => {
-        try{
-            const url = '/api/book?isbn=' + userInfo.isbn;
-            const params = {
-                // isbn: userInfo.isbn,
-                title: bookTitle,
-                author: author,
-                description: description,
-            }
-            const response = await axios.delete(url, {
-                params : params
-            })
-            if(response.status === 201) {
-                navigate('/app/bookdiary')
-            }
-        }catch(error) {
-            console.error(error)
-        }
+        dispatch(deleteBook({id}))
+        navigate('/app/bookdiary')
     }
 
     return(
@@ -106,7 +77,7 @@ const BookDetail = () => {
                 />
                 <Button
                     text={'수정'}
-                    onClick={() => confirmBtn()}
+                    onClick={() => updateBtn()}
                     type={"confirm"}
                 />
             </section>

@@ -66,7 +66,7 @@ const BookDiary: React.FC = () => {
                 <ul className='m-0 p-0 g-0 border'>
                     {
                         saveBookList.map((item) => (
-                            <li key={item.isbn} 
+                            <li key={item.id} 
                                 className='border-bottom p-2 pb-3 g-0 row flex-nowrap position-relative booklist'
                             >
                                 <div className='imgArea m-0 p-0'>

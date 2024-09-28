@@ -21,6 +21,7 @@ const initialState: BookListState = {
     status: 'idle'
 }
 
+// list 추가 시
 type bookList = {
     bookTitle: string,
     author: string,
@@ -28,6 +29,13 @@ type bookList = {
     description: string,
     isbn: string,
     id?: string,
+}
+// list 수정 시
+type updateBookList = {
+    bookTitle: string,
+    author: string,
+    description: string,
+    id: string,
 }
 
 // api 주소
@@ -60,15 +68,13 @@ export const addList = createAsyncThunk(
 // api put
 export const updateList = createAsyncThunk(
     'lists/updateList',
-    async ({ bookTitle, author, bookImg, description, isbn, id}:bookList ) => {
+    async ({ bookTitle, author, description, id}:updateBookList ) => {
         const params = {
             title: bookTitle,
             author: author,
-            image: bookImg,
             description: description,
-            isbn: isbn
         }
-        const response = await axios.put(url + `/${id}`, params)
+        const response = await axios.patch(url + `/${id}`, params)
         return response.data
     }
 )
