@@ -7,7 +7,6 @@ interface List {
     author: string,
     description: string,
     image: string,
-    link: string,
     isbn: string,
     id: string
 }
@@ -28,8 +27,7 @@ type bookList = {
     bookImg: string,
     description: string,
     isbn: string,
-    id: string,
-    link: string
+    id?: string,
 }
 
 // api 주소
@@ -41,7 +39,6 @@ export const fetchLists = createAsyncThunk(
     'lists/fetchLists',
     async () => {
         const response = await axios.get(url);
-        console.log('Fetched data:', response.data);
         return response.data
     }
 )

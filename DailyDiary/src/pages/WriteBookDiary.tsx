@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../src/app/store';
 import { fetchBooks } from '../features/api/BookSlice';
 import { addList } from '../features/api/BookListSlice';
-import axios from 'axios'
 import Button from '../components/Button';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,10 +14,10 @@ import { useNavigate } from 'react-router-dom';
 const WriteBookDiary: React.FC = () => {
     const bookList = useSelector((state: RootState) => state.books.bookList) // api search list
     const status = useSelector((state: RootState) => state.books.status) // api search list status
-
     const dispatch = useDispatch<AppDispatch>();
     
     const navigate = useNavigate();
+
     const [ bookTitle, setBookTitle ] =useState('') // 책 제목
     const [ author, setAuthor ] =useState('') // 책 저자
     const [ description, setDescription ] =useState('') // 책 줄거리
@@ -40,6 +39,7 @@ const WriteBookDiary: React.FC = () => {
     const [ currentPage, setCurrentPage ] = useState(1); // api start 위치
     const [ presentPage, setPresentPage] = useState(1) // 현재 리스트 페이지
     const total = useSelector((state: RootState) => state.books.totalBookList) // 전체 리스트 길이
+    // 전 list 보기
     const handlePreBtn = (pageNumber: number) => {
         if( presentPage == 1 || currentPage == 1 ) {
             setCurrentPage(1)
@@ -48,7 +48,8 @@ const WriteBookDiary: React.FC = () => {
             setCurrentPage(currentPage - pageNumber)
             setPresentPage(presentPage - 1)
         }
-    } 
+    }
+    // 후 list 보기
     const handleNextBtn = (pageNumber: number) => {
         if ( currentPage + 3 >= total){
             alert('마지막 리스트 입니다.')
@@ -62,8 +63,7 @@ const WriteBookDiary: React.FC = () => {
         if(status === 'idle') {
             dispatch(fetchBooks({ bookTitle, currentPage }))
         }
-    }, [bookTitle, currentPage]) // dispatch, status
-    
+    }, [bookTitle, currentPage])
 
     // 책 저자 입력
     const handleAuthor = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,27 +90,9 @@ const WriteBookDiary: React.FC = () => {
     } 
 
     // Book API에 정보 저장
-    const confirmBtn2 = async () => {
+    const confirmBtn = async () => {
         dispatch(addList({ bookTitle, author, bookImg, description, isbn }));
         navigate('/app/bookdiary')  
-    }
-    const confirmBtn = async () => {
-        try{
-            const url = 'http://175.212.136.236:8081/book';
-            const params = {
-                title: bookTitle,
-                author: author,
-                image: bookImg,
-                description: description,
-                isbn: isbn
-            }
-            const response = await axios.post(url, params)
-            if(response.status === 201) {
-                navigate('/app/bookdiary')
-            }
-        }catch(error) {
-            console.error(error)
-        }
     }
     // 닫기 버튼 클릭 시
     const cancleBtn = async () => {
@@ -179,11 +161,6 @@ const WriteBookDiary: React.FC = () => {
                 <Button
                     text={'저장'}
                     onClick={() => confirmBtn()}
-                    type={"confirm"}
-                />
-                <Button
-                    text={'임시 저장'}
-                    onClick={() => confirmBtn2()}
                     type={"confirm"}
                 />
             </section>
