@@ -39,8 +39,7 @@ type updateBookList = {
 }
 
 // api 주소
-// const url = '/api/bookList';
-const url = 'http://175.212.136.236:8081/book';
+const url = '/api/bookList';
 
 // 비동기 액션 생성
 // api get
@@ -104,13 +103,13 @@ const listSlice = createSlice({
             .addCase(addList.fulfilled, (state, action) => { // list 추가
                 state.saveBookList.push(action.payload)
             })
-            .addCase(updateList.fulfilled, (state, action) => { // list 수정
+            .addCase(updateList.fulfilled, (state, action) => {
                 const index = state.saveBookList.findIndex((list) => list.id === action.payload.id);
                 if(index !== -1){
                     state.saveBookList[index] = action.payload
                 }
             })
-            .addCase(deleteBook.fulfilled, (state, action) => { // list 삭제
+            .addCase(deleteBook.fulfilled, (state, action) => {
                 state.saveBookList = state.saveBookList.filter((list) => list.id !== action.payload)
             })
     }
