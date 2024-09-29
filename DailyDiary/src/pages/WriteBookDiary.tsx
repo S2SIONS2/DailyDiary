@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../src/app/store';
 import { fetchBooks } from '../features/api/BookSlice';
 import { addList } from '../features/api/BookListSlice';
+import { setLoadingStatus } from '../features/api/BookSlice'
 import Button from '../components/Button';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -87,6 +88,9 @@ const WriteBookDiary: React.FC = () => {
         setAuthor(book.author)
         setBookImg (book.image)
         setIsbn(book.isbn)
+
+        // const dispatch = useDispatch();
+        dispatch(setLoadingStatus());
     } 
 
     // Book API에 정보 저장

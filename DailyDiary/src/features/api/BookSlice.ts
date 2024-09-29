@@ -52,11 +52,17 @@ export const fetchBooks = createAsyncThunk(
 const bookSlice = createSlice({
   name: 'books',
   initialState,
-  reducers: {},
+  reducers: {
+    setLoadingStatus: (state) => {
+      state.status = 'loading';
+      state.bookList = [];
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchBooks.pending, (state) => { // fetchBooks가 시작되었을 때 상태
         state.status = 'loading';
+        state.bookList = []
       })
       .addCase(fetchBooks.fulfilled, (state, action) => { // 비동기 액션인 fetchBooks가 성공적으로 완료되었을 때 상태
         state.status = 'idle';
@@ -75,4 +81,5 @@ const bookSlice = createSlice({
   },
 });
 
+export const { setLoadingStatus } = bookSlice.actions;
 export default bookSlice.reducer;
