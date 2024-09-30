@@ -12,8 +12,8 @@ function App() {
   return (
     <div className="App position-relative">
       <div className="row justify-content-between w-auto m-0 p-0">
-        <h1 className="w-auto">
-          <a href="/app">My Diary</a>
+        <h1 className="w-auto mainTitle">
+          <a className="mainTitle" href="/app">My Diary</a>
         </h1>
         <Button 
           text={<FontAwesomeIcon icon={faBars} />}
@@ -25,7 +25,8 @@ function App() {
         nav && (
           <nav className="row w-100 h-100 mt-2 border border-2 border-warning">
             <div className="h-auto mt-2">
-              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
+              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
+              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/calendar' onClick={() => setNav(false)}>달력</Link>
             </div>
           </nav>
         )
