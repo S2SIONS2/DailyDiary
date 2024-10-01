@@ -12,7 +12,7 @@ import BookDetail from './pages/BookDetail.tsx'
 
 import { Provider } from 'react-redux';
 import { store } from './app/store.ts';
-import Calendar from './pages/Calendar.tsx'
+import CalendarPage from './pages/CalendarPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
@@ -23,7 +23,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='bookdiary' element={<BookDiary />} />
           <Route path='writebookdiary' element={<WriteBookDiary />} />
           <Route path='bookdetail' element={<BookDetail />} />
-          <Route path='calendar' element={<Calendar />} />
+          <Route path='calendar' element={<CalendarPage />} />
         </Route>
         <Route path='/nodata' element={<NoData />} />
         <Route path='/loading' element={<Loading />} />
