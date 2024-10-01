@@ -4,7 +4,10 @@ import Button from './Button';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../app/store';
+import { addList, fetchLists } from '../features/api/CalendarSlice';
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
@@ -33,16 +36,46 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
         setScheduleList(newScheduleList);
     }
 
+    // calendar api 호출
+    const apiScheduleList = useSelector((state: RootState) => state.schedules.scheduleList)
+    const status = useSelector((state: RootState) => state.schedules.status)
+    const dispatch = useDispatch<AppDispatch>()
+
+    // 해당 날짜 api list 호출
+    const chooseDate = moment(selectedDate).format('YYYY-MM-DD')
+    useEffect(() => {
+        if(status === 'idle') {
+            dispatch(fetchLists({chooseDate}))
+        }
+    }, [selectedDate])
+
+
+    const confirmBtn = async () => {
+        console.log(chooseDate)
+        // dispatch(addList({ date, schedule }));
+    }
+
     return (
         <div className="CalendarDetail mt-4 p-2">
             <section className='row align-items-center justify-content-between m-0 g-0 p-0'>
+                {apiScheduleList.map((item) => (
+                    <div key={item.date}>
+                        {item.schedule}
+                        <div>
+                            
+                        </div>
+                    </div>
+                ))}
                 <h4 className='w-auto m-0'>
                     {selectedDate ? moment(selectedDate).format('YYYY년 MM월 DD일') : '날짜 선택 안됨'}
                 </h4>
                 <Button 
-                    text={'닫기'}
+                    text={'확인'}
                     type='confirm'
-                    onClick={onClose}    
+                    onClick={() => {
+                        confirmBtn()
+                        onClose()
+                    }}    
                 />
             </section>
             <section className='mt-3'>
