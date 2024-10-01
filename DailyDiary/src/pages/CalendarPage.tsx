@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Calendar } from 'react-calendar'
-import 'react-calendar/dist/Calendar.css';
-import CalendarDetail from '../components/CalendarDetail'
-import moment from 'moment'
+import { Calendar } from 'react-calendar';
+import CalendarDetail from '../components/CalendarDetail';
+import moment from 'moment'; // yyyy-mm-dd format
+import 'react-calendar/dist/Calendar.css'; // library custom css
 
 const CalendarPage: React.FC = () => {
     // react-calendar 라이브러리 기본 설정
@@ -10,29 +10,37 @@ const CalendarPage: React.FC = () => {
     type Value = ValuePiece | [ValuePiece, ValuePiece];
 
     const [value, onChange] = useState<Value>(new Date());
-
-    // 날짜 클릭 시 모달 생성
-    const [modal, setModal] = useState(false);
-    const openModal = () => {
-        setModal(true)
-    }
     
+    // 클릭한 날짜를 저장하는 상태
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    
+    // 모달을 열고 닫는 상태
+    const [modal, setModal] = useState(false);
+    
+    // 날짜 클릭 시 모달 열기 및 날짜 저장
+    const openModal = (date: Date) => {
+        setSelectedDate(date);
+        setModal(true);
+    }
+
     return (
         <div className="Calendar">
             <div className='row align-items-center justify-content-between mb-3 g-0 w-100'>
-                <h3 className='w-auto'>달력</h3>
+                <h3 className='w-auto'>달력 및 일정 관리</h3>
             </div>
             <section>
                 <Calendar 
                     onChange={onChange} 
                     value={value} 
-                    onClickDay={console.log(value)}
-                    onClick={() => openModal()}
+                    formatDay={(local, date) => moment(date).format("D")}
+                    onClickDay={(value) => {
+                        openModal(value); // 클릭한 날짜를 전달
+                    }}
                 />
             </section>
-            {moment(value).format("YYYY년 MM월 DD일")} 
+            {/* {moment(value).format("YYYY년 MM월 DD일")}  */}
             {
-                modal && <CalendarDetail />
+                modal && <CalendarDetail selectedDate={selectedDate} onClose={() => setModal(false)} />
             }
         </div>
     )
