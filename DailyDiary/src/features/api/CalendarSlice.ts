@@ -21,7 +21,8 @@ const initialState: CalendarApi = {
 
 // list 검색 타입
 type searchSchedule = {
-    chooseDate: string
+    today?: string,
+    chooseDate?: string
 }
 
 // list 추가 시 타입
@@ -52,15 +53,17 @@ const url = 'http://175.212.136.236:8081/calendar';
 // api get 호출
 export const fetchLists = createAsyncThunk(
     'schedules/fetchLists',
-    async ({chooseDate}: searchSchedule) => {
+    async ({ today, chooseDate }: searchSchedule) => {
+        const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
         const response = await axios.get(url, {
             params: {
-                date: chooseDate
+                date: dateParam
             }
-        })
-        return response.data
+        });
+        return response.data;
     }
-)
+);
+
 // api post 
 // 랜덤 id 값 생성
 const getRandomId = () => {
@@ -120,7 +123,6 @@ export const updateList = createAsyncThunk(
 export const deleteList = createAsyncThunk(
     'schedules/deleteList',
     async ({apiId, apiDate, newScheduleList}: deleteList) => {
-        // const updatedScheduleList = [...apiScheduleList, ...scheduleList];     
         const params = {
             id: apiId,
             date: apiDate,

@@ -12,28 +12,35 @@ import { addList, deleteList, fetchLists, updateList, correctList } from '../fea
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
-    onClose: () => void;
 }
 
-const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }) => {
+const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     // calendar api 호출
     const apiData = useSelector((state: RootState) => state.schedules.scheduleList)
     const status = useSelector((state: RootState) => state.schedules.status)
     const dispatch = useDispatch<AppDispatch>()
 
     // 클릭한 날짜 api list 호출
-    const chooseDate = moment(selectedDate).format('YYYY-MM-DD') // 달력 클릭 날짜
+    const today = moment(new Date()).format('YYYY-MM-DD') // 오늘 날짜
+    const chooseDate = moment(selectedDate).format('YYYY-MM-DD')// 달력 클릭 날짜
+    const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
     const selectedSchedules = apiData.find(item => item.date === chooseDate); // api list 중 클릭한 날짜와 동일한 날짜의 리스트
-    const apiScheduleList = selectedSchedules?.schedule // 동일 날짜 리스트 중 스케줄 리스트
+    const todaySchedules = apiData.find(item => item.date === today); // api list 중 클릭한 날짜와 동일한 날짜의 리스트
+    // 동일 날짜 리스트 중 새로 고침 시 오늘 일정으로 고정
+    const apiScheduleList = selectedSchedules?.schedule !== undefined ? selectedSchedules?.schedule : todaySchedules?.schedule
     const apiId = selectedSchedules?.id // api list id
     const apiDate = selectedSchedules?.date // api list date
 
     // 해당 날짜의 스케줄 리스트를 가져오는 로직
     useEffect(() => {
         if (status === 'idle') {
-            dispatch(fetchLists({ chooseDate }))
+            if(!chooseDate || isNaN(new Date(chooseDate).getTime())){
+                dispatch(fetchLists({ today }))
+            }else{
+                dispatch(fetchLists({ chooseDate }))
+            }
         }
-    }, [chooseDate]);
+    }, [today, chooseDate]);
 
     // 추가 할 스케줄이 담긴 스케줄 리스트
     const [scheduleList, setScheduleList] = useState<string[]>([]);
@@ -65,10 +72,10 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
 
     // 일정 수정
     const [correctSchedule, setCorrectSchedule] = useState(apiScheduleList || []);
-
     useEffect(() => {
         setCorrectSchedule(apiScheduleList || []);
     }, [apiScheduleList]);
+
     // input 일정 수정 핸들링
     const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const newCorrectSchedule = [...correctSchedule];
@@ -100,14 +107,13 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
         <div className="CalendarDetail mt-4 p-2">
             <section className='row align-items-center justify-content-between m-0 g-0 p-0'>
                 <h4 className='w-auto m-0'>
-                    {selectedDate ? moment(selectedDate).format('YYYY년 MM월 DD일') : '날짜 선택 안됨'}
+                    {dateParam ? moment(dateParam).format('YYYY년 MM월 DD일') : '날짜 선택이 안되었습니다.'}
                 </h4>
                 <Button 
                     text={'확인'}
                     type='confirm'
                     onClick={() => {
                         confirmBtn();
-                        onClose();
                     }}    
                 />
             </section>
@@ -121,6 +127,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
                     />
                 </div>
                 <ul className='row align-items-center m-0 g-0 p-0'>
+                    {
+                        !apiScheduleList && '일정이 없습니다.'
+                    }
                     {
                         scheduleList.map((schedule, i) => (
                             <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2'>

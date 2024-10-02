@@ -14,13 +14,9 @@ const CalendarPage: React.FC = () => {
     // 클릭한 날짜를 저장하는 상태
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     
-    // 모달을 열고 닫는 상태
-    const [modal, setModal] = useState(false);
-    
     // 날짜 클릭 시 모달 열기 및 날짜 저장
     const openModal = (date: Date) => {
         setSelectedDate(date);
-        setModal(true);
     }
 
     return (
@@ -37,11 +33,8 @@ const CalendarPage: React.FC = () => {
                         openModal(value); // 클릭한 날짜를 전달
                     }}
                 />
+                 <CalendarDetail selectedDate={selectedDate} />
             </section>
-            {/* {moment(value).format("YYYY년 MM월 DD일")}  */}
-            {
-                modal && <CalendarDetail selectedDate={selectedDate} onClose={() => setModal(false)} />
-            }
         </div>
     )
 }
