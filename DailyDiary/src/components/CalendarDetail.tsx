@@ -104,7 +104,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     }
 
     return (
-        <div className="CalendarDetail mt-4 p-2">
+        <div className="CalendarDetail h-100 p-2">
             <section className='row align-items-center justify-content-between m-0 g-0 p-0'>
                 <h4 className='w-auto m-0'>
                     {dateParam ? moment(dateParam).format('YYYY년 MM월 DD일') : '날짜 선택이 안되었습니다.'}

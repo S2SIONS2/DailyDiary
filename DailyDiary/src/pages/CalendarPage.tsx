@@ -1,3 +1,4 @@
+import './CalendarPage.scss'
 import { useState } from "react";
 import { Calendar } from 'react-calendar';
 import CalendarDetail from '../components/CalendarDetail';
@@ -24,16 +25,20 @@ const CalendarPage: React.FC = () => {
             <div className='row align-items-center justify-content-between mb-3 g-0 w-100'>
                 <h3 className='w-auto'>달력 및 일정 관리</h3>
             </div>
-            <section>
-                <Calendar 
-                    onChange={onChange} 
-                    value={value} 
-                    formatDay={(local, date) => moment(date).format("D")}
-                    onClickDay={(value) => {
-                        openModal(value); // 클릭한 날짜를 전달
-                    }}
-                />
-                 <CalendarDetail selectedDate={selectedDate} />
+            <section className="row componentSection">
+            <div className="col-12 col-md-6">
+                    <Calendar 
+                        onChange={onChange} 
+                        value={value} 
+                        formatDay={(_, date) => moment(date).format("D")}
+                        onClickDay={(value) => {
+                            openModal(value); // 클릭한 날짜를 전달
+                        }}
+                    />
+                </div>
+                <div className="col-12 col-md-6 mt-4 mt-md-0">
+                    <CalendarDetail selectedDate={selectedDate} />
+                </div>
             </section>
         </div>
     )
