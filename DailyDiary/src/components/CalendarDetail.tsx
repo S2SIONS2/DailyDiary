@@ -8,7 +8,7 @@ import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { addList, fetchLists } from '../features/api/CalendarSlice';
+import { addList, deleteList, fetchLists, updateList } from '../features/api/CalendarSlice';
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
@@ -25,6 +25,8 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
     const chooseDate = moment(selectedDate).format('YYYY-MM-DD') // 달력 클릭 날짜
     const selectedSchedules = apiData.find(item => item.date === chooseDate); // api list 중 클릭한 날짜와 동일한 날짜의 리스트
     const apiScheduleList = selectedSchedules?.schedule // 동일 날짜 리스트 중 스케줄 리스트
+    const apiId = selectedSchedules?.id // api list id
+    const apiDate = selectedSchedules?.date // api list date
 
     // 해당 날짜의 스케줄 리스트를 가져오는 로직
     useEffect(() => {
@@ -34,8 +36,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
     }, [chooseDate]);
 
     // 추가 할 스케줄이 담긴 스케줄 리스트
-    const [scheduleList, setScheduleList] = useState(apiScheduleList || '')
-    
+    // const [scheduleList, setScheduleList] = useState<string[]>([apiScheduleList || '']);
+    const [scheduleList, setScheduleList] = useState<string[]>([]);
+
     // 스케줄 인풋 값 핸들링
     const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const newScheduleList = [...scheduleList];
@@ -43,11 +46,31 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
         setScheduleList(newScheduleList);
     }
 
-    // 리스트 추가
+    // 일정 추가
+    const addSchedule = () => {
+        setScheduleList([...scheduleList, '']);
+    }
+
+    // 일정 삭제 - 페이지에서O, api X
+    const deleteSchedule = (index: number) => {
+        const newScheduleList = scheduleList.filter((_, i) => i !== index);
+        setScheduleList(newScheduleList);
+    }
+    // 일정 삭제 - 페이지에서 X, api O
+    const deleteApi = (index: number) => {
+        const newScheduleList = apiScheduleList != undefined ? apiScheduleList.filter((_, i) => i !== index) : apiScheduleList;
+        dispatch(deleteList({apiId, apiDate, newScheduleList}))
+    }
+
+    // api post (추가)
     const confirmBtn = async () => {
-        if (selectedSchedules) {
+        if (selectedSchedules && scheduleList.length > 0) {
+            // alert('추가? 입니다.');
+            dispatch(updateList({apiId, apiDate, apiScheduleList, scheduleList}))
+        }else if(selectedSchedules) {
             alert('이미 있는 일정입니다.');
-        } else {
+        }
+         else {
             dispatch(addList({ chooseDate, scheduleList }));
         }
     }
@@ -80,24 +103,42 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
                     <Button 
                         text={<FontAwesomeIcon icon={faPlus} />}
                         type='confirm'
-                        // onClick={addSchedule}   
+                        onClick={addSchedule}   
                     />
                 </div>
                 <ul className='row align-items-center m-0 g-0 p-0'>
+                    {
+                        scheduleList.map((schedule, i) => (
+                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2'>
+                                <input 
+                                    type='text' 
+                                    className='w-auto m-0 g-0 flex-grow-1'
+                                    value={schedule}
+                                    onChange={(e) => handleSchedule(e, i)}
+                                    placeholder={'추가 할 일정을 작성 해주세요.'}
+                                />
+                                <Button 
+                                    text={<FontAwesomeIcon icon={faX} />}
+                                    type='cancel'
+                                    onClick={() => deleteSchedule(i)}  
+                                />
+                            </li>
+                        ))
+                    }
                     {
                         apiScheduleList && apiScheduleList.map((schedule, i) => (
                             <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2'>
                                 <input 
                                     type='text' 
                                     className='w-auto m-0 g-0 flex-grow-1'
-                                    value={schedule || scheduleList}
+                                    value={schedule || ''}
                                     onChange={(e) => handleSchedule(e, i)}
                                     // placeholder={schedule}
                                 />
                                 <Button 
                                     text={<FontAwesomeIcon icon={faX} />}
                                     type='cancel'
-                                    onClick={() => deleteSchedule(i)}  
+                                    onClick={() => deleteApi(i)}  
                                 />
                             </li>
                         ))
