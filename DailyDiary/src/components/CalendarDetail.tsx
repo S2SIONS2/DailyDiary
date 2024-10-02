@@ -58,8 +58,10 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
     }
     // 일정 삭제 - 페이지에서 X, api O
     const deleteApi = (index: number) => {
-        const newScheduleList = apiScheduleList != undefined ? apiScheduleList.filter((_, i) => i !== index) : apiScheduleList;
-        dispatch(deleteList({apiId, apiDate, newScheduleList}))
+        if(confirm('일정이 삭제 됩니다. 삭제 하시겠습니까?') == true){
+            const newScheduleList = apiScheduleList != undefined ? apiScheduleList.filter((_, i) => i !== index) : apiScheduleList;
+            dispatch(deleteList({apiId, apiDate, newScheduleList}))
+        }
     }
 
     // api post (추가)
