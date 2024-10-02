@@ -25,8 +25,9 @@ type searchSchedule = {
 
 // list 추가 시 타입
 type ScheduleList = {
+    id?: string,
     chooseDate: string,
-    schedule: string
+    scheduleList: string[]
 }
 
 // api 주소
@@ -45,12 +46,20 @@ export const fetchLists = createAsyncThunk(
     }
 )
 // api post 
+// 랜덤 id 값 생성
+const getRandomId = () => {
+    const now = new Date();
+    const timeStamp = now.getTime();
+    const randomNum = Math.floor(Math.random() * 10000)
+    return `${timeStamp}-${randomNum}`;
+}
 export const addList = createAsyncThunk(
     'schedules/addList',
-    async ({ chooseDate, schedule }: ScheduleList) => {
+    async ({ chooseDate, scheduleList }: ScheduleList) => {
         const params = {
+            id: getRandomId(),
             date: chooseDate,
-            schedule: schedule
+            schedule: scheduleList
         }
         const response = await axios.post(url, params)
         return response.data
