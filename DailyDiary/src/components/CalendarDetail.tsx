@@ -8,7 +8,7 @@ import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { addList, deleteList, fetchLists, updateList } from '../features/api/CalendarSlice';
+import { addList, deleteList, fetchLists, updateList, correctList } from '../features/api/CalendarSlice';
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
@@ -36,10 +36,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
     }, [chooseDate]);
 
     // 추가 할 스케줄이 담긴 스케줄 리스트
-    // const [scheduleList, setScheduleList] = useState<string[]>([apiScheduleList || '']);
     const [scheduleList, setScheduleList] = useState<string[]>([]);
 
-    // 스케줄 인풋 값 핸들링
+    // 추가 스케줄 인풋 값 핸들링
     const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const newScheduleList = [...scheduleList];
         newScheduleList[index] = e.target.value;
@@ -64,13 +63,26 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
         }
     }
 
+    // 일정 수정
+    const [correctSchedule, setCorrectSchedule] = useState(apiScheduleList || []);
+
+    useEffect(() => {
+        setCorrectSchedule(apiScheduleList || []);
+    }, [apiScheduleList]);
+    // input 일정 수정 핸들링
+    const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const newCorrectSchedule = [...correctSchedule];
+        newCorrectSchedule[index] = e.target.value;
+        setCorrectSchedule(newCorrectSchedule);
+    };
+
     // api post (추가)
     const confirmBtn = async () => {
         if (selectedSchedules && scheduleList.length > 0) {
             // alert('추가? 입니다.');
             dispatch(updateList({apiId, apiDate, apiScheduleList, scheduleList}))
         }else if(selectedSchedules) {
-            alert('이미 있는 일정입니다.');
+            dispatch(correctList({apiId, apiDate, correctSchedule, scheduleList}))
         }
          else {
             dispatch(addList({ chooseDate, scheduleList }));
@@ -128,13 +140,13 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate, onClose }
                         ))
                     }
                     {
-                        apiScheduleList && apiScheduleList.map((schedule, i) => (
+                        apiScheduleList && apiScheduleList.map((_, i) => (
                             <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2'>
                                 <input 
                                     type='text' 
                                     className='w-auto m-0 g-0 flex-grow-1'
-                                    value={schedule || ''}
-                                    onChange={(e) => handleSchedule(e, i)}
+                                    value={correctSchedule[i] || ''}
+                                    onChange={(e) => handleScheduleChange(e, i)}
                                     // placeholder={schedule}
                                 />
                                 <Button 

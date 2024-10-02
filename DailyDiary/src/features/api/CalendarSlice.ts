@@ -30,11 +30,12 @@ type ScheduleList = {
     chooseDate: string,
     scheduleList: string[]
 }
-// list 수정 시 타입
+// list 수정 혹은 새 스케줄 추가 시 타입
 type updateList = {
     apiId: string | undefined,
     apiDate: string | undefined,
     apiScheduleList?: string[]// 기존 리스트
+    correctSchedule? : string[] // 수정 된 기존 리스트
     scheduleList?: string[] // 추가 할 리스트
 }
 // list 삭제 시 타입
@@ -81,7 +82,24 @@ export const addList = createAsyncThunk(
     }
 )
 
-// api put
+// api 기존 리스트 수정
+export const correctList = createAsyncThunk(
+    'schedules/correctList',
+    async ({apiId, apiDate, correctSchedule = [], scheduleList = []}: updateList) => {
+        // 기존 스케줄 리스트에 새로운 스케줄을 추가
+        const updatedScheduleList = [...correctSchedule, ...scheduleList];       
+        // 병합된 스케줄 리스트로 Put 요청
+        const params = {
+            id: apiId,
+            date: apiDate,
+            schedule: updatedScheduleList
+        };
+        const response = await axios.patch(url + `/${apiId}`, params)
+        return response.data
+    }
+)
+
+// api 새 리스트 추가
 export const updateList = createAsyncThunk(
     'schedules/updateList',
     async ({apiId, apiDate, apiScheduleList = [], scheduleList = []}: updateList) => {
@@ -93,7 +111,7 @@ export const updateList = createAsyncThunk(
             date: apiDate,
             schedule: updatedScheduleList
         };
-        const response = await axios.put(url + `/${apiId}`, params)
+        const response = await axios.patch(url + `/${apiId}`, params)
         return response.data
     }
 )
