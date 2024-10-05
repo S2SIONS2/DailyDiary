@@ -5,8 +5,8 @@ import axios from 'axios';
 interface List {
     id: string,
     date : string,
-    schedule : string[],
-    todoList : object[]
+    schedule? : string[],
+    todoList? : object[]
 }
 
 interface CalendarApi {

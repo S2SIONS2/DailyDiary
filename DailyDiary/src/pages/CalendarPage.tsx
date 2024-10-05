@@ -26,7 +26,7 @@ const CalendarPage: React.FC = () => {
                 <h3 className='w-auto'>달력 및 일정 관리</h3>
             </div>
             <section className="row componentSection">
-            <div className="col-12 col-md-6">
+                <div className="col-12 col-md-6">
                     <Calendar 
                         onChange={onChange} 
                         value={value} 
