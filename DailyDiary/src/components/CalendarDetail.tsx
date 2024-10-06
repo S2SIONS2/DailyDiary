@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
 import { addList, deleteList, fetchLists, updateList, correctList } from '../features/api/CalendarSlice';
-import { fetchTodoLists } from "../features/api/ToDoSlice";
 import TodoList from './TodoList';
 
 interface CalendarDetailProps {
@@ -84,11 +83,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
         newCorrectSchedule[index] = e.target.value;
         setCorrectSchedule(newCorrectSchedule);
     };
-
-    // to do list 컴포넌트 값 받아오기
-    const getTodos = (todoList) => {
-        dispatch(fetchTodoLists({checked, content, chooseDate}))
-    }
 
     // api post (추가)
     const confirmBtn = async () => {
@@ -178,7 +172,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             <section className='mt-3'>
                 <TodoList 
                     selectedDate={selectedDate}
-                    getTodos={getTodos}
                 />
             </section>
         </div>

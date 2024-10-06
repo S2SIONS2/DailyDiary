@@ -28,11 +28,11 @@ type searchLists = {
     chooseDate?: string
 }
 // post api type
-type addTodo =([{
+type addTodo = {
     chooseDate: string,
     checked: boolean,
     content: ''
-}])
+}
 
 // api 주소
 const url = 'http://175.212.136.236:8081/calendar';
@@ -79,12 +79,15 @@ const todoListSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchLists.pending, (state) => {
+            .addCase(fetchTodoLists.pending, (state) => {
                 state.status = 'loading'
             })
-            .addCase(fetchLists.fulfilled, (state, action) => { // list 호출 대기
+            .addCase(fetchTodoLists.fulfilled, (state, action) => { // list 호출 대기
                 state.status = 'idle';
                 state.todoList = action.payload
+            })
+            .addCase(addTodoList.fulfilled, (state, action) => {
+                state.todoList.push(action.payload)
             })
     }
 })

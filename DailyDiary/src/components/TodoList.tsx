@@ -10,14 +10,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 interface TodoListProps {
-    selectedDate: Date | null,
-    getTodos: {
-        checked: boolean,
-        content: string
-    }
+    selectedDate: Date | null
 }
 
-const TodoList: React.FC<TodoListProps> = ({ selectedDate, getTodos }) => {
+const TodoList: React.FC<TodoListProps> = ({ selectedDate }) => {
     // calendar api 호출 - to do list
     const apiData = useSelector((state: RootState) => state.todoList.todoList)
     const status = useSelector((state: RootState) => state.todoList.status)
@@ -74,10 +70,6 @@ const TodoList: React.FC<TodoListProps> = ({ selectedDate, getTodos }) => {
     }
 
     // api post 호출
-    // 부모로 todo 정보 전달
-    const setTodos = () => {
-        getTodos(todoList);
-    };
 
     return (
         <div className="TodoList">
