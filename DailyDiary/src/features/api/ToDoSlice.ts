@@ -23,15 +23,20 @@ const initialState: ToDoList = {
     status: 'idle'
 }
 // get api type
-type searchLists = {
+type SearchLists = {
     today?: string,
     chooseDate?: string
 }
 // post api type
-type addTodo = {
+type AddTodo = {
     chooseDate: string,
-    checked: boolean,
-    content: ''
+    todoList: Todo[]
+}
+// 일정이 이이 있을 때 투 두 리스트 추가 시
+type UpdateTodo = {
+    apiId: string | undefined,
+    apiDate: string | undefined,
+    todoList: Todo[]
 }
 
 // api 주소
@@ -40,7 +45,7 @@ const url = 'http://175.212.136.236:8081/calendar';
 // api get 호출
 export const fetchTodoLists = createAsyncThunk(
     'todoList/fetchLists',
-    async ({ today, chooseDate }: searchLists) => {
+    async ({ today, chooseDate }: SearchLists) => {
         const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
         const response = await axios.get(url, {
             params: {
@@ -59,16 +64,30 @@ const getRandomId = () => {
     const randomNum = Math.floor(Math.random() * 10000)
     return `${timeStamp}-${randomNum}`;
 }
-export const addTodoList = createAsyncThunk(
+// 일정 없이 투두 리스트만 들어갈 때
+export const addTodoLists = createAsyncThunk(
     'todoList/addList',
-    async ({ chooseDate, checked, content }: addTodo ) => {
+    async ({ chooseDate, todoList }: AddTodo ) => {
         const params = {
             id: getRandomId(),
             date: chooseDate,
-            checked: checked,
-            content: content
+            todoList: todoList,
         }
         const response = await axios.post(url, params)
+        return response.data
+    }
+)
+
+// 일정이 먼저 있다면
+export const updateTodo = createAsyncThunk(
+    'todoList/updateTodo',
+    async ({apiId, apiDate, todoList}: UpdateTodo) => {
+        const params = {
+            id: apiId,
+            date: apiDate,
+            todoList: todoList,
+        }
+        const response = await axios.patch(url + `/${apiId}`, params)
         return response.data
     }
 )
@@ -86,8 +105,12 @@ const todoListSlice = createSlice({
                 state.status = 'idle';
                 state.todoList = action.payload
             })
-            .addCase(addTodoList.fulfilled, (state, action) => {
+            .addCase(addTodoLists.fulfilled, (state, action) => {
                 state.todoList.push(action.payload)
+            })
+            .addCase(updateTodo.fulfilled, (state, action) => {
+                const index = state.todoList.findIndex((list) => list.id === action.payload.id)
+                state.todoList[index] = action.payload
             })
     }
 })

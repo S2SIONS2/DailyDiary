@@ -28,7 +28,8 @@ type searchSchedule = {
 // list 추가 시 타입
 type ScheduleList = {
     id?: string,
-    chooseDate: string,
+    today?: string,
+    chooseDate?: string,
     scheduleList: string[]
 }
 // list 수정 혹은 새 스케줄 추가 시 타입
@@ -74,10 +75,10 @@ const getRandomId = () => {
 }
 export const addList = createAsyncThunk(
     'schedules/addList',
-    async ({ chooseDate, scheduleList }: ScheduleList) => {
+    async ({ today, chooseDate, scheduleList }: ScheduleList) => {
         const params = {
             id: getRandomId(),
-            date: chooseDate,
+            date: chooseDate || today,
             schedule: scheduleList
         }
         const response = await axios.post(url, params)

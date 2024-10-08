@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-else-if */
 import './CalendarDetail.scss'
 import moment from 'moment'
 import Button from './Button';
@@ -13,6 +14,7 @@ import TodoList from './TodoList';
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
+    // todayValue: string | null;
 }
 
 const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
@@ -37,6 +39,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
         if (status === 'idle') {
             if(!chooseDate || isNaN(new Date(chooseDate).getTime())){
                 dispatch(fetchLists({ today }))
+                
             }else{
                 dispatch(fetchLists({ chooseDate }))
             }
@@ -86,14 +89,37 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
 
     // api post (추가)
     const confirmBtn = async () => {
-        if (selectedSchedules && scheduleList.length > 0) {
-            // alert('추가? 입니다.');
+        if(!chooseDate && !apiScheduleList){
+            dispatch(addList({ today, scheduleList }));
+        }
+        else if(!chooseDate && selectedSchedules && scheduleList.length > 0){
             dispatch(updateList({apiId, apiDate, apiScheduleList, scheduleList}))
-        }else if(selectedSchedules) {
+            setScheduleList([]); // 스케줄 지우기
+        }
+        else if(!chooseDate && selectedSchedules){
             dispatch(correctList({apiId, apiDate, correctSchedule, scheduleList}))
+            setScheduleList([]); // 스케줄 지우기
+        }
+        else if (selectedSchedules && scheduleList.length > 0) {
+            alert('일정이 이미 있을 때 추가 입니다.');
+            console.log(today)
+            console.log(chooseDate)
+            dispatch(updateList({apiId, apiDate, apiScheduleList, scheduleList}))
+            setScheduleList([]); // 스케줄 지우기
+        }else if(selectedSchedules) {
+            alert('수정.');
+            console.log(today)
+            console.log(chooseDate)
+            dispatch(correctList({apiId, apiDate, correctSchedule, scheduleList}))
+            setScheduleList([]); // 스케줄 지우기
+            console.log(scheduleList)
         }
          else {
+            alert('처음 추가 입니다.');
+            console.log(today)
+            console.log(chooseDate)
             dispatch(addList({ chooseDate, scheduleList }));
+            setScheduleList([]); // 스케줄 지우기
         }
     }
 
@@ -133,7 +159,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     }
                     {
                         scheduleList.map((schedule, i) => (
-                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2'>
+                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2 schedule'>
                                 <input 
                                     type='text' 
                                     className='w-auto m-0 g-0 flex-grow-1'
@@ -151,7 +177,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     }
                     {
                         apiScheduleList && apiScheduleList.map((_, i) => (
-                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2'>
+                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2 apischedule'>
                                 <input 
                                     type='text' 
                                     className='w-auto m-0 g-0 flex-grow-1'

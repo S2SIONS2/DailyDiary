@@ -10,7 +10,7 @@ const CalendarPage: React.FC = () => {
     type ValuePiece = Date | null;
     type Value = ValuePiece | [ValuePiece, ValuePiece];
 
-    const [value, onChange] = useState<Value>(new Date());
+    const [todayValue, onChange] = useState<Value>(new Date());
     
     // 클릭한 날짜를 저장하는 상태
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -29,7 +29,7 @@ const CalendarPage: React.FC = () => {
                 <div className="col-12 col-md-6">
                     <Calendar 
                         onChange={onChange} 
-                        value={value} 
+                        value={todayValue} 
                         formatDay={(_, date) => moment(date).format("D")}
                         onClickDay={(value) => {
                             openModal(value); // 클릭한 날짜를 전달
@@ -37,7 +37,10 @@ const CalendarPage: React.FC = () => {
                     />
                 </div>
                 <div className="col-12 col-md-6 mt-4 mt-md-0">
-                    <CalendarDetail selectedDate={selectedDate} />
+                    <CalendarDetail 
+                        selectedDate={selectedDate} 
+                        // todayValue={todayValue}
+                    />
                 </div>
             </section>
         </div>
