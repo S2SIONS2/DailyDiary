@@ -1,15 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import bookReducer from '../features/api/BookSlice.ts';
 import listReducer from '../features/api/BookListSlice.ts';
-import scheduleReducer from '../features/api/CalendarSlice.ts';
-import todoListReducer from '../features/api/ToDoSlice.ts'
+import scheduleReducer from '../features/api/CalendarSlice.ts'
 
 export const store = configureStore({
   reducer: {
     books: bookReducer,
     lists: listReducer,
-    schedules: scheduleReducer,
-    todoList: todoListReducer,
+    schedules: scheduleReducer
   },
   devTools: process.env.NODE_ENV !== 'production'
 });

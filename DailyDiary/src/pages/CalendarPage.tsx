@@ -15,8 +15,8 @@ const CalendarPage: React.FC = () => {
     // 클릭한 날짜를 저장하는 상태
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     
-    // 날짜 클릭 시 모달 열기 및 날짜 저장
-    const openModal = (date: Date) => {
+    // 날짜 클릭 시 자식에게 날짜 전달
+    const deleverDate = (date: Date) => {
         setSelectedDate(date);
     }
 
@@ -32,14 +32,13 @@ const CalendarPage: React.FC = () => {
                         value={todayValue} 
                         formatDay={(_, date) => moment(date).format("D")}
                         onClickDay={(value) => {
-                            openModal(value); // 클릭한 날짜를 전달
+                            deleverDate(value); // 클릭한 날짜를 전달
                         }}
                     />
                 </div>
                 <div className="col-12 col-md-6 mt-4 mt-md-0">
                     <CalendarDetail 
                         selectedDate={selectedDate} 
-                        // todayValue={todayValue}
                     />
                 </div>
             </section>

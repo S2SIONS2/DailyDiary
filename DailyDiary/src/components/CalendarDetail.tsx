@@ -1,16 +1,13 @@
-/* eslint-disable no-dupe-else-if */
 import './CalendarDetail.scss'
 import moment from 'moment'
 import Button from './Button';
-import Loading from '../pages/Loading';
+import TodoList from './TodoList';
+import ScheduleList from './ScheduleList';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { addList, deleteList, fetchLists, updateList, correctList } from '../features/api/CalendarSlice';
-import TodoList from './TodoList';
+import { addSchedules } from '../features/api/CalendarSlice';
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
@@ -18,123 +15,40 @@ interface CalendarDetailProps {
 }
 
 const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
-    // calendar api 호출 - 일정 관리 
-    const apiData = useSelector((state: RootState) => state.schedules.scheduleList)
-    const status = useSelector((state: RootState) => state.schedules.status)
-    const dispatch = useDispatch<AppDispatch>()
-
-    // 클릭한 날짜 api list 호출
-    const today = moment(new Date()).format('YYYY-MM-DD') // 오늘 날짜
-    const chooseDate = moment(selectedDate).format('YYYY-MM-DD')// 달력 클릭 날짜
+    // 오늘 날짜
+    const today = moment(new Date()).format('YYYY-MM-DD')
+    // 달력 클릭 날짜
+    const chooseDate = moment(selectedDate).format('YYYY-MM-DD')
+    // 클릭 된 날짜가 없을 때 오늘 날짜 뜨기 - 처음 페이지 로딩 후
     const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
-    const selectedSchedules = apiData.find(item => item.date === chooseDate); // api list 중 클릭한 날짜와 동일한 날짜의 리스트
-    const todaySchedules = apiData.find(item => item.date === today); // api list 중 클릭한 날짜와 동일한 날짜의 리스트
-    // 동일 날짜 리스트 중 새로 고침 시 오늘 일정으로 고정
-    const apiScheduleList = selectedSchedules?.schedule !== undefined ? selectedSchedules?.schedule : todaySchedules?.schedule
-    const apiId = selectedSchedules?.id // api list id
-    const apiDate = selectedSchedules?.date // api list date
+    const headerDate = moment(dateParam).format('YYYY년 MM월 DD일')
+    // api 저장 할 스케줄 추가 
+    const [schedule, setSchedule] = useState<string[]>([]);
+    const dispatch = useDispatch<AppDispatch>();
+    
+    // api 스케줄 체크
+    const apiCalendarList = useSelector((state: RootState) => state.schedules.scheduleList);
+    const apiScheduleList = apiCalendarList.map((item) => item.schedule);
+    // api 스케줄 저장
+    const confirmBtn = () => {
+        // api 스케줄이 없고 날짜가 오늘 일 때
+        alert('1')
+        if(apiScheduleList.length == 0 && schedule){
+            alert('2')
+            dispatch(addSchedules({ today, chooseDate, schedule }))
+        }
+    }
 
-    // 해당 날짜의 스케줄 리스트를 가져오는 로직
     useEffect(() => {
-        if (status === 'idle') {
-            if(!chooseDate || isNaN(new Date(chooseDate).getTime())){
-                dispatch(fetchLists({ today }))
-                
-            }else{
-                dispatch(fetchLists({ chooseDate }))
-            }
-        }
-    }, [today, chooseDate]);
-
-    // 추가 할 스케줄이 담긴 스케줄 리스트
-    const [scheduleList, setScheduleList] = useState<string[]>([]);
-
-    // 추가 스케줄 인풋 값 핸들링
-    const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const newScheduleList = [...scheduleList];
-        newScheduleList[index] = e.target.value;
-        setScheduleList(newScheduleList);
-    }
-
-    // 일정 추가
-    const addSchedule = () => {
-        setScheduleList([...scheduleList, '']);
-    }
-
-    // 일정 삭제 - 페이지에서O, api X
-    const deleteSchedule = (index: number) => {
-        const newScheduleList = scheduleList.filter((_, i) => i !== index);
-        setScheduleList(newScheduleList);
-    }
-    // 일정 삭제 - 페이지에서 X, api O
-    const deleteApi = (index: number) => {
-        if(confirm('일정이 삭제 됩니다. 삭제 하시겠습니까?') == true){
-            const newScheduleList = apiScheduleList != undefined ? apiScheduleList.filter((_, i) => i !== index) : apiScheduleList;
-            dispatch(deleteList({apiId, apiDate, newScheduleList}))
-        }
-    }
-
-    // 일정 수정
-    const [correctSchedule, setCorrectSchedule] = useState(apiScheduleList || []);
-    useEffect(() => {
-        setCorrectSchedule(apiScheduleList || []);
-    }, [apiScheduleList]);
-
-    // input 일정 수정 핸들링
-    const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        const newCorrectSchedule = [...correctSchedule];
-        newCorrectSchedule[index] = e.target.value;
-        setCorrectSchedule(newCorrectSchedule);
-    };
-
-    // api post (추가)
-    const confirmBtn = async () => {
-        if(!chooseDate && !apiScheduleList){
-            dispatch(addList({ today, scheduleList }));
-        }
-        else if(!chooseDate && selectedSchedules && scheduleList.length > 0){
-            dispatch(updateList({apiId, apiDate, apiScheduleList, scheduleList}))
-            setScheduleList([]); // 스케줄 지우기
-        }
-        else if(!chooseDate && selectedSchedules){
-            dispatch(correctList({apiId, apiDate, correctSchedule, scheduleList}))
-            setScheduleList([]); // 스케줄 지우기
-        }
-        else if (selectedSchedules && scheduleList.length > 0) {
-            alert('일정이 이미 있을 때 추가 입니다.');
-            console.log(today)
-            console.log(chooseDate)
-            dispatch(updateList({apiId, apiDate, apiScheduleList, scheduleList}))
-            setScheduleList([]); // 스케줄 지우기
-        }else if(selectedSchedules) {
-            alert('수정.');
-            console.log(today)
-            console.log(chooseDate)
-            dispatch(correctList({apiId, apiDate, correctSchedule, scheduleList}))
-            setScheduleList([]); // 스케줄 지우기
-            console.log(scheduleList)
-        }
-         else {
-            alert('처음 추가 입니다.');
-            console.log(today)
-            console.log(chooseDate)
-            dispatch(addList({ chooseDate, scheduleList }));
-            setScheduleList([]); // 스케줄 지우기
-        }
-    }
-
-    // api list 로딩중일때
-    if (status === 'loading') {
-        return (
-            <Loading />
-        );
-    }
+        console.log(apiScheduleList)
+        console.log(schedule)
+    }, [schedule])
 
     return (
         <div className="CalendarDetail h-100 p-2">
             <section className='row align-items-center justify-content-between m-0 g-0 p-0'>
                 <h4 className='w-auto m-0'>
-                    {dateParam ? moment(dateParam).format('YYYY년 MM월 DD일') : '날짜 선택이 안되었습니다.'}
+                    {headerDate}
                 </h4>
                 <Button 
                     text={'확인'}
@@ -145,55 +59,11 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                 />
             </section>
             <section className='mt-3'>
-                <div className='row align-items-center justify-content-between m-0 g-0 p-0'>
-                    <h5 className='w-auto'>일정 추가</h5>
-                    <Button 
-                        text={<FontAwesomeIcon icon={faPlus} />}
-                        type='confirm'
-                        onClick={addSchedule}   
-                    />
-                </div>
-                <ul className='row align-items-center m-0 g-0 p-0'>
-                    {
-                        !apiScheduleList && '일정이 없습니다.'
-                    }
-                    {
-                        scheduleList.map((schedule, i) => (
-                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2 schedule'>
-                                <input 
-                                    type='text' 
-                                    className='w-auto m-0 g-0 flex-grow-1'
-                                    value={schedule}
-                                    onChange={(e) => handleSchedule(e, i)}
-                                    placeholder={'추가 할 일정을 작성 해주세요.'}
-                                />
-                                <Button 
-                                    text={<FontAwesomeIcon icon={faX} />}
-                                    type='cancel'
-                                    onClick={() => deleteSchedule(i)}  
-                                />
-                            </li>
-                        ))
-                    }
-                    {
-                        apiScheduleList && apiScheduleList.map((_, i) => (
-                            <li key={i} className='row align-items-center m-0 g-0 gap-1 mt-2 apischedule'>
-                                <input 
-                                    type='text' 
-                                    className='w-auto m-0 g-0 flex-grow-1'
-                                    value={correctSchedule[i] || ''}
-                                    onChange={(e) => handleScheduleChange(e, i)}
-                                    // placeholder={schedule}
-                                />
-                                <Button 
-                                    text={<FontAwesomeIcon icon={faX} />}
-                                    type='cancel'
-                                    onClick={() => deleteApi(i)}  
-                                />
-                            </li>
-                        ))
-                    }
-                </ul>
+                <ScheduleList 
+                    selectedDate={selectedDate}
+                    schedule = {schedule}
+                    setScheduleList = {setSchedule}
+                />
             </section>
             <section className='mt-3'>
                 <TodoList 
