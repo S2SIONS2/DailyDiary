@@ -7,7 +7,7 @@ import ScheduleList from './ScheduleList';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { addSchedules } from '../features/api/CalendarSlice';
+import { addSchedules, correctSchedule, newSchedule, updateSchedule } from '../features/api/CalendarSlice';
 
 interface CalendarDetailProps {
     selectedDate: Date | null;
@@ -27,22 +27,46 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     const dispatch = useDispatch<AppDispatch>();
     
     // api 스케줄 체크
-    const apiCalendarList = useSelector((state: RootState) => state.schedules.scheduleList);
+    const apiCalendarList = useSelector((state: RootState) => state.schedules.scheduleList);   
     const apiScheduleList = apiCalendarList.map((item) => item.schedule);
+    // api 수정 시
+    const apiID = apiCalendarList[0]?.id // api list id
+    const apiDate = apiCalendarList[0]?.date // api list date
+
+    // 수정 할 리스트
+    const [correctionSchedule, setCorrectionSchedule] = useState(apiScheduleList[0] || []);
+
+    useEffect(() => {
+        if(apiScheduleList.length > 0){
+            setCorrectionSchedule(apiScheduleList[0])
+        }
+    }, [apiCalendarList])
+
     // api 스케줄 저장
     const confirmBtn = () => {
         // api 스케줄이 없고 날짜가 오늘 일 때
-        alert('1')
         if(apiScheduleList.length == 0 && schedule){
-            alert('2')
             dispatch(addSchedules({ today, chooseDate, schedule }))
+            setSchedule([]);
+            return;
+        }
+        // api 스케줄 수정 시
+        if(apiScheduleList.length > 0 && correctionSchedule && schedule.length == 0) {
+            return;
+        }
+        // api 스케줄 추가 시
+        if(apiScheduleList.length > 0 && schedule.length > 0 && correctSchedule.length > 0){
+            dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+            setSchedule([]);
+            return;
+        }
+        // api 스케줄 수정과 추가 시
+        if(apiScheduleList.length > 0 && correctionSchedule && schedule) {
+            dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
+            setSchedule([]);
+            return;
         }
     }
-
-    useEffect(() => {
-        console.log(apiScheduleList)
-        console.log(schedule)
-    }, [schedule])
 
     return (
         <div className="CalendarDetail h-100 p-2">
@@ -62,7 +86,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                 <ScheduleList 
                     selectedDate={selectedDate}
                     schedule = {schedule}
-                    setScheduleList = {setSchedule}
+                    setSchedule = {setSchedule}
+                    correctionSchedule = {correctionSchedule}
+                    setCorrectionSchedule = {setCorrectionSchedule}
                 />
             </section>
             <section className='mt-3'>

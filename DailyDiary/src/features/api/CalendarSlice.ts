@@ -3,6 +3,8 @@ import axios from 'axios'
 
 // 스케줄 api
 interface Schedule {
+    id: string,
+    date: string,
     schedule: string[]
 }
 
@@ -27,6 +29,33 @@ type ScheduleList = {
     today?: string;
     chooseDate?: string;
     schedule: string[];
+}
+// 기존 스케줄 수정 시 타입 정의
+type correctSchedule = {
+    apiID?: string | undefined,
+    apiDate?: string | undefined,
+    correctionSchedule: string[]
+}
+// 기존 스케줄에 추가 스케줄 생길 시 타입 정의
+type UpdateSchedule = {
+    apiID?: string | undefined,
+    apiDate?: string | undefined,
+    apiScheduleList: string[] | string[][]
+    schedule: string[]
+}
+// 기존 스케줄 수정 및 새 스케줄 추가
+type NewSchedule = {
+    apiID?: string | undefined,
+    apiDate?: string | undefined,
+    correctionSchedule: string[],
+    schedule: string[]
+}
+
+// 타입 삭제 시
+type DeleteSchedule = {
+    apiID?: string | undefined,
+    apiScheduleList: string[][]
+    subIndex: number
 }
 
 // api 호출 주소
@@ -68,6 +97,65 @@ export const addSchedules = createAsyncThunk(
     }
 )
 
+// api 기존 스케줄 수정
+export const correctSchedule = createAsyncThunk(
+    'schedules/correctSchedule',
+    async ({ apiID, apiDate, correctionSchedule = [] }: correctSchedule) => {
+        const params = {
+            id: apiID,
+            date: apiDate,
+            schedule: correctionSchedule
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    }
+)
+
+// 기존 api에 스케줄 추가
+export const updateSchedule = createAsyncThunk(
+    'schedules/updateSchedule',
+    async ({ apiID, apiDate, apiScheduleList, schedule }: UpdateSchedule) => {
+        const updatedSchedule = [...apiScheduleList[0] || [], ...schedule]
+        const params = {
+            id: apiID,
+            date: apiDate,
+            schedule: updatedSchedule
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    }
+)
+
+// 기존 api 수정과 추가 동시에 이루어질 때
+export const newSchedule = createAsyncThunk(
+    'schedules/newSchedule',
+    async ( { apiID, apiDate, correctionSchedule, schedule}: NewSchedule) => {
+        const newScheduleList = [...correctionSchedule || [], ...schedule]
+        const params = {
+            id: apiID,
+            date: apiDate,
+            schedule: newScheduleList
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    }
+)
+
+// api 삭제 시
+export const deleteScheduleList = createAsyncThunk(
+    'schedules/deleteSchedule',
+    async ({ apiID, apiScheduleList, subIndex }: DeleteSchedule) => {
+        const newScheduleList =  apiScheduleList[0].filter((_, index) => index !== subIndex);
+        const params = {
+            id: apiID,
+            schedule: newScheduleList
+        };
+        const response = await axios.patch(url + `/${apiID}`, params)
+
+        return response.data;
+    }
+);
+
 // slice 생성
 const scheduleSlice = createSlice({
     name: 'schedules',
@@ -84,7 +172,20 @@ const scheduleSlice = createSlice({
             })
             .addCase(addSchedules.fulfilled, (state, action) => {
                 state.scheduleList.push(action.payload);
-            });
+                state.scheduleList = action.payload
+            })
+            .addCase(updateSchedule.fulfilled, (state, action) => {
+                console.log(state.scheduleList)
+            })
+            .addCase(deleteScheduleList.fulfilled, (state, action) => { // 삭제 시 화면에 삭제 리스트 제외하고 띄움
+                const updatedSchedule = action.payload;
+                const index = state.scheduleList.findIndex((schedule) => schedule.id === action.payload.id);
+                state.scheduleList = [
+                    ...state.scheduleList.slice(0, index),
+                    updatedSchedule,
+                    ...state.scheduleList.slice(index + 1),
+                ];
+            })
     }
 })
 

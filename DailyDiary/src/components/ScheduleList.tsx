@@ -2,7 +2,7 @@ import Loading from "../pages/Loading";
 import Button from "./Button";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
-import { fetchSchedules } from "../features/api/CalendarSlice";
+import { fetchSchedules, deleteScheduleList } from "../features/api/CalendarSlice";
 
 import { useEffect } from "react";
 
@@ -14,16 +14,20 @@ import moment from 'moment'
 interface ScheduleListProps {
     selectedDate: Date | null;
     schedule: string[] | null;
-    setScheduleList: React.Dispatch<React.SetStateAction<string[]>>;
+    setSchedule: React.Dispatch<React.SetStateAction<string[]>>;
+    correctionSchedule: string[]
+    setCorrectionSchedule: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, setScheduleList }) => {
+const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, setSchedule, correctionSchedule, setCorrectionSchedule }) => {
     const today = moment(new Date()).format('YYYY-MM-DD');
     const chooseDate = moment(selectedDate).format('YYYY-MM-DD');
 
     const apiCalendarList = useSelector((state: RootState) => state.schedules.scheduleList);
     const apiScheduleList = apiCalendarList.map((item) => item.schedule);
     const status = useSelector((state: RootState) => state.schedules.status);
+
+    const apiID = apiCalendarList[0]?.id // api list id
 
     const dispatch = useDispatch<AppDispatch>();
 
@@ -38,26 +42,31 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, set
     }, [today, chooseDate]);
 
     const addSchedule = () => {
-        setScheduleList([...(schedule || []), '']);
+        setSchedule([...(schedule || []), '']);
     };
 
     const deleteSchedule = (i: number) => {
-        setScheduleList((prev) => prev.filter((_, index) => index !== i));
+        setSchedule((prev) => prev.filter((_, index) => index !== i));
     };
 
     const onChangeSchedule = (i: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const newScheduleList = [...schedule || []];
         newScheduleList[i] = e.target.value
-        setScheduleList(newScheduleList)
+        setSchedule(newScheduleList)
     }
 
-    const deleteApi = (i: number) => {
-        alert('API 일정 삭제 버튼');
+    // 기존 스케줄 수정 시
+    const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, subIndex: number) => {
+        const newCorrectSchedule = [...correctionSchedule || []]
+        newCorrectSchedule[subIndex] = e.target.value
+        setCorrectionSchedule(newCorrectSchedule)
     };
 
-    useEffect(() => {
-        console.log(schedule)
-    }, [])
+    const deleteApi = (subIndex: number) => {
+        if( confirm('일정이 삭제됩니다. 진행 하시겠습니까?') == true){
+            dispatch(deleteScheduleList({ apiID, apiScheduleList, subIndex }))
+        }
+    };
 
     if (status === 'loading') {
         return <Loading />;
@@ -99,13 +108,13 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, set
                                 <input
                                     type='text'
                                     className='w-auto m-0 g-0 ps-1 flex-grow-1'
-                                    value={subItem || ''}
-                                    readOnly
+                                    value={correctionSchedule[subIndex] || ''}
+                                    onChange={(e) => handleSchedule(e, subIndex)}
                                 />
                                 <Button
                                     text={<FontAwesomeIcon icon={faX} />}
                                     type='cancel'
-                                    onClick={() => deleteApi(index)}
+                                    onClick={() => deleteApi(subIndex)}
                                 />
                             </li>
                         ))
