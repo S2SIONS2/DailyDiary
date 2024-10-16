@@ -172,10 +172,9 @@ const scheduleSlice = createSlice({
             })
             .addCase(addSchedules.fulfilled, (state, action) => {
                 state.scheduleList.push(action.payload);
-                state.scheduleList = action.payload
             })
             .addCase(updateSchedule.fulfilled, (state, action) => {
-                console.log(state.scheduleList)
+                state.scheduleList = [action.payload];
             })
             .addCase(deleteScheduleList.fulfilled, (state, action) => { // 삭제 시 화면에 삭제 리스트 제외하고 띄움
                 const updatedSchedule = action.payload;
