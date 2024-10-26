@@ -176,6 +176,9 @@ const scheduleSlice = createSlice({
             .addCase(updateSchedule.fulfilled, (state, action) => {
                 state.scheduleList = [action.payload];
             })
+            .addCase(newSchedule.fulfilled, (state, action) => {
+                state.scheduleList = [action.payload];
+            })
             .addCase(deleteScheduleList.fulfilled, (state, action) => { // 삭제 시 화면에 삭제 리스트 제외하고 띄움
                 const updatedSchedule = action.payload;
                 const index = state.scheduleList.findIndex((schedule) => schedule.id === action.payload.id);

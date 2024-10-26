@@ -56,7 +56,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             return;
         }
         // api 스케줄 추가 시
-        if(apiScheduleList.length > 0 && schedule.length > 0 && correctSchedule.length > 0){
+        if(apiScheduleList.length > 0 && schedule.length > 0 && correctionSchedule.length == 0){
             dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
             setSchedule([]);
             return;
