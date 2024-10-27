@@ -1,8 +1,7 @@
-import Loading from "../pages/Loading";
 import Button from "./Button";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
-import { fetchSchedules, deleteScheduleList } from "../features/api/CalendarSlice";
+import { fetchCalendatList, deleteScheduleList } from "../features/api/CalendarSlice";
 
 import { useEffect } from "react";
 
@@ -11,32 +10,39 @@ import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import moment from 'moment'
 
+interface Schedule {
+    schedule: string[]
+}
+
 interface ScheduleListProps {
     selectedDate: Date | null;
     schedule: string[] | null;
     setSchedule: React.Dispatch<React.SetStateAction<string[]>>;
-    correctionSchedule: string[]
-    setCorrectionSchedule: React.Dispatch<React.SetStateAction<string[]>>;
+    correctionSchedule: Schedule[]
+    setCorrectionSchedule: React.Dispatch<React.SetStateAction<Schedule[]>>;
 }
 
 const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, setSchedule, correctionSchedule, setCorrectionSchedule }) => {
     const today = moment(new Date()).format('YYYY-MM-DD');
     const chooseDate = moment(selectedDate).format('YYYY-MM-DD');
 
-    const apiCalendarList = useSelector((state: RootState) => state.schedules.scheduleList);
-    const apiScheduleList = apiCalendarList.map((item) => item.schedule);
-    const status = useSelector((state: RootState) => state.schedules.status);
+    // const apiTotal = useSelector((state: RootState) => state.calendarLists.id)
+    // const apiCalendarList = useSelector((state: RootState) => state.calendarLists);
+    const apiScheduleList = useSelector((state: RootState) => state.calendarLists.scheduleList);
+    const status = useSelector((state: RootState) => state.calendarLists.status);
 
-    const apiID = apiCalendarList[0]?.id // api list id
+    const apiID = useSelector((state: RootState) => state.calendarLists.id) // api list id
 
     const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         if (status === 'idle') {
             if (!chooseDate || isNaN(new Date(chooseDate).getTime())) {
-                dispatch(fetchSchedules({ today }));
+                dispatch(fetchCalendatList({ today }));
+                // console.log(apiID)
             } else {
-                dispatch(fetchSchedules({ chooseDate }));
+                dispatch(fetchCalendatList({ chooseDate }));
+                // console.log(apiID)
             }
         }
     }, [today, chooseDate]);
@@ -56,21 +62,17 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, set
     }
 
     // 기존 스케줄 수정 시
-    const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, subIndex: number) => {
+    const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const newCorrectSchedule = [...correctionSchedule || []]
-        newCorrectSchedule[subIndex] = e.target.value
+        newCorrectSchedule[index] = e.target.value
         setCorrectionSchedule(newCorrectSchedule)
     };
 
-    const deleteApi = (subIndex: number) => {
+    const deleteApi = (index: number) => {
         if( confirm('일정이 삭제됩니다. 진행 하시겠습니까?') == true){
-            dispatch(deleteScheduleList({ apiID, apiScheduleList, subIndex }))
+            dispatch(deleteScheduleList({ apiID, apiScheduleList, index }))
         }
     };
-
-    if (status === 'loading') {
-        return <Loading />;
-    }
 
     return (
         <div className="ScheduleList">
@@ -102,25 +104,22 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, set
                     </li>
                 ))}
                 {
-                    apiScheduleList && apiScheduleList.map((item: string[], index) => (
-                        item.map((subItem, subIndex) => (
-                            <li className='row align-items-center m-0 g-0 gap-1 mt-2 apischedule' key={`${index}-${subIndex}`}>
-                                <input
-                                    type='text'
-                                    className='w-auto m-0 g-0 ps-1 flex-grow-1'
-                                    value={correctionSchedule[subIndex] || ''}
-                                    onChange={(e) => handleSchedule(e, subIndex)}
-                                />
-                                <Button
-                                    text={<FontAwesomeIcon icon={faX} />}
-                                    type='cancel'
-                                    onClick={() => deleteApi(subIndex)}
-                                />
-                            </li>
-                        ))
+                    apiScheduleList != undefined && apiScheduleList.map((_, index) => (
+                        <li key={index} className="mt-2 w-100 row align-items-center gap-2 p-0 g-0">
+                            <input
+                                type='text'
+                                className='w-auto m-0 g-0 ps-1 flex-grow-1'
+                                value={correctionSchedule[index] || ''}
+                                onChange={(e) => handleSchedule(e, index)}
+                            />
+                            <Button
+                                text={<FontAwesomeIcon icon={faX} />}
+                                type='cancel'
+                                onClick={() => deleteApi(index)}
+                            />
+                        </li>
                     ))
                 }
-
             </ul>
         </div>
     );

@@ -1,25 +1,39 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-// 스케줄 api
+// schedule
 interface Schedule {
-    id: string,
-    date: string,
     schedule: string[]
 }
 
-interface ScheduleListState {
+// to do list
+interface TodoItem {
+    checked: boolean,
+    content: string
+}
+// interface TodoList {
+//     todoList: TodoItem[]
+// }
+
+// 공통 
+interface CalendarListState {
+    id: string,
+    date: string,
     scheduleList: Schedule[],
+    todoList: TodoItem[],
     status: 'idle' | 'loading' | 'failed'
 }
 
-const initialState: ScheduleListState = {
+const initialState: CalendarListState = {
+    id: '',
+    date: '',
     scheduleList: [],
+    todoList: [],
     status: 'idle'
 }
 
 // 스케줄 검색 타입 정의
-type SearchSchedules = {
+type SearchLists = {
     today? : string,
     chooseDate? : string
 }
@@ -31,7 +45,7 @@ type ScheduleList = {
     schedule: string[];
 }
 // 기존 스케줄 수정 시 타입 정의
-type correctSchedule = {
+type CorrectSchedule = {
     apiID?: string | undefined,
     apiDate?: string | undefined,
     correctionSchedule: string[]
@@ -63,9 +77,9 @@ const url = 'http://175.212.136.236:8081/calendar';
 
 // 비동기 액션 생성
 // api get
-export const fetchSchedules = createAsyncThunk(
-    'schedules/fetchSchedules',
-    async ({today, chooseDate} : SearchSchedules) => {
+export const fetchCalendatList = createAsyncThunk(
+    'calendars/fetchCalendatList',
+    async ({today, chooseDate} : SearchLists) => {
         // 선택 된 날짜가 없을 때 오늘 날짜 검색
         const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
         const params = {
@@ -84,7 +98,7 @@ const getRandomId = () => {
     return `${timeStamp} - ${randomNum}`
 }
 export const addSchedules = createAsyncThunk(
-    'schedules/addScheduless',
+    'calendars/addScheduless',
     async ({today, chooseDate, schedule}: ScheduleList) => {
         const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
         const params = {
@@ -99,8 +113,8 @@ export const addSchedules = createAsyncThunk(
 
 // api 기존 스케줄 수정
 export const correctSchedule = createAsyncThunk(
-    'schedules/correctSchedule',
-    async ({ apiID, apiDate, correctionSchedule = [] }: correctSchedule) => {
+    'calendars/correctSchedule',
+    async ({ apiID, apiDate, correctionSchedule = [] }: CorrectSchedule) => {
         const params = {
             id: apiID,
             date: apiDate,
@@ -113,7 +127,7 @@ export const correctSchedule = createAsyncThunk(
 
 // 기존 api에 스케줄 추가
 export const updateSchedule = createAsyncThunk(
-    'schedules/updateSchedule',
+    'calendars/updateSchedule',
     async ({ apiID, apiDate, apiScheduleList, schedule }: UpdateSchedule) => {
         const updatedSchedule = [...apiScheduleList[0] || [], ...schedule]
         const params = {
@@ -128,7 +142,7 @@ export const updateSchedule = createAsyncThunk(
 
 // 기존 api 수정과 추가 동시에 이루어질 때
 export const newSchedule = createAsyncThunk(
-    'schedules/newSchedule',
+    'calendars/newSchedule',
     async ( { apiID, apiDate, correctionSchedule, schedule}: NewSchedule) => {
         const newScheduleList = [...correctionSchedule || [], ...schedule]
         const params = {
@@ -143,7 +157,7 @@ export const newSchedule = createAsyncThunk(
 
 // api 삭제 시
 export const deleteScheduleList = createAsyncThunk(
-    'schedules/deleteSchedule',
+    'calendars/deleteSchedule',
     async ({ apiID, apiScheduleList, subIndex }: DeleteSchedule) => {
         const newScheduleList =  apiScheduleList[0].filter((_, index) => index !== subIndex);
         const params = {
@@ -158,17 +172,20 @@ export const deleteScheduleList = createAsyncThunk(
 
 // slice 생성
 const scheduleSlice = createSlice({
-    name: 'schedules',
+    name: 'calendars',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchSchedules.pending, (state) => {
+            .addCase(fetchCalendatList.pending, (state) => {
                 state.status = 'loading'
             })
-            .addCase(fetchSchedules.fulfilled, (state, action) => {
+            .addCase(fetchCalendatList.fulfilled, (state, action) => {
                 state.status = 'idle';
-                state.scheduleList = action.payload
+                state.date = action.payload[0]?.date;
+                state.id = action.payload[0]?.id;
+                state.scheduleList = action.payload[0]?.schedule ;
+                state.todoList = action.payload[0]?.todoList; 
             })
             .addCase(addSchedules.fulfilled, (state, action) => {
                 state.scheduleList.push(action.payload);
@@ -180,13 +197,14 @@ const scheduleSlice = createSlice({
                 state.scheduleList = [action.payload];
             })
             .addCase(deleteScheduleList.fulfilled, (state, action) => { // 삭제 시 화면에 삭제 리스트 제외하고 띄움
-                const updatedSchedule = action.payload;
-                const index = state.scheduleList.findIndex((schedule) => schedule.id === action.payload.id);
-                state.scheduleList = [
-                    ...state.scheduleList.slice(0, index),
-                    updatedSchedule,
-                    ...state.scheduleList.slice(index + 1),
-                ];
+                // const updatedSchedule = action.payload;
+                // const index = state.scheduleList.findIndex((schedule) => schedule.id === action.payload.id);
+                // state.scheduleList = [
+                //     ...state.scheduleList.slice(0, index),
+                //     updatedSchedule,
+                //     ...state.scheduleList.slice(index + 1),
+                // ];
+                state.scheduleList = action.payload;
             })
     }
 })
