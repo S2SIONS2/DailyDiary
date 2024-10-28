@@ -46,7 +46,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     const apiScheduleList = useSelector((state: RootState) => state.calendarLists.scheduleList)
 
     // api to do list 체크
-    const apiTotalTodoList = useSelector((state: RootState) => state.calendarLists.todoList)
+    const apiTodoList = useSelector((state: RootState) => state.calendarLists.todoList)
 
     // api 수정 시
     const apiID= useSelector((state: RootState) => state.calendarLists.id)  // api list id
@@ -54,21 +54,19 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
 
     // 수정 할 리스트
     const [correctionSchedule, setCorrectionSchedule] = useState(apiScheduleList || []); // 스케줄
-    const [correctionTodos, setCorrectionTodos] = useState(apiTotalTodoList || [])
+    const [correctionTodos, setCorrectionTodos] = useState(apiTodoList || [])
 
+    // 비동기 해결, api 호출 시 있는데 담기지 않으면 로딩 되지 않게
     useEffect(() => {
         if (apiScheduleList) {
             setCorrectionSchedule(apiScheduleList || []);
             setIsLoading(false);
-            // console.log(apiScheduleList)
         }
-        if (apiTotalTodoList) {
-            setCorrectionTodos(apiTotalTodoList || [])
+        if (apiTodoList) {
+            setCorrectionTodos(apiTodoList || [])
             setIsLoading(false);
-            // console.log(apiTotalTodoList)
-            // console.log(correctionTodos)
         }
-    }, [apiTotalTodoList, apiScheduleList])
+    }, [apiTodoList, apiScheduleList])
 
     // api 스케줄 저장
     // const confirmBtn = () => {
@@ -97,7 +95,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     //     }
     // }
 
-    if (isLoading) return <Loading />
+    if (isLoading) {
+        return <Loading />
+    }
 
     return (
         <div className="CalendarDetail h-100 p-2">

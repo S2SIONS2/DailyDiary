@@ -2,7 +2,7 @@ import './TodoList.scss'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../app/store'
-import { fetchCalendatList } from '../features/api/CalendarSlice'
+import { deleteTodoList, fetchCalendatList } from '../features/api/CalendarSlice'
 
 import moment from 'moment'
 import Button from './Button'
@@ -24,17 +24,18 @@ interface TodoListProps {
 }
 
 const TodoList: React.FC<TodoListProps> = ({ selectedDate, toDoList, setToDoList, correctionTodos, setCorrectionTodos }, ) => {
-    
+    // 날짜 선택, 오늘과 선택된 날짜
     const today = moment(new Date()).format('YYYY-MM-DD');
     const chooseDate = moment(selectedDate).format('YYYY-MM-DD');
 
+    // api status
+    const status = useSelector((state: RootState) => state.calendarLists.status);
     const dispatch = useDispatch<AppDispatch>();
 
-    const status = useSelector((state: RootState) => state.calendarLists.status);
-
     // api to do list 체크
-    const apiTotalTodoList = useSelector((state: RootState) => state.calendarLists.todoList)
+    const apiTodoList = useSelector((state: RootState) => state.calendarLists.todoList)
 
+    // api 호출
     useEffect(() => {
         if (status === 'idle') {
             if (!chooseDate || isNaN(new Date(chooseDate).getTime())) {
@@ -45,6 +46,7 @@ const TodoList: React.FC<TodoListProps> = ({ selectedDate, toDoList, setToDoList
         }
     }, [today, chooseDate]);
 
+    // to do list 추가
     const addTodos = () => {
         setToDoList([
             ...toDoList || [],
@@ -63,7 +65,12 @@ const TodoList: React.FC<TodoListProps> = ({ selectedDate, toDoList, setToDoList
         setToDoList(newTodos)
     }
 
-    // 기존 api 체크, 컨텐츠 수정
+    // 새로 추가 한 to do list 삭제
+    const deleteTodo = (i: number) => {
+        setToDoList((prev) => prev.filter((_, index) => index !== i))
+    }
+
+    // 기존에 불러온 api to do list 체크, 컨텐츠 수정
     const handleTodoCheck= (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const newTodos = correctionTodos.map((todo, i) =>
             i === index ? { ...todo, checked: e.target.checked } : todo
@@ -77,6 +84,13 @@ const TodoList: React.FC<TodoListProps> = ({ selectedDate, toDoList, setToDoList
         setCorrectionTodos(newTodos)
     }
 
+    // api to do list 삭제
+    const apiID = useSelector((state: RootState) => state.calendarLists.id)
+    const deleteApi = (i: number) => {
+        if( confirm('할 일 목록이 사라집니다. 진행 하시겠습니까?') == true){
+            dispatch(deleteTodoList({ apiID, apiTodoList, i }))
+        }
+    }
 
     return (
         <div className="TodoList">
@@ -107,13 +121,13 @@ const TodoList: React.FC<TodoListProps> = ({ selectedDate, toDoList, setToDoList
                         <Button
                             text={<FontAwesomeIcon icon={faX} />}
                             type='cancel'
-                            onClick={() => deleteApi(index)}
+                            onClick={() => deleteTodo(index)}
                         />
                     </li>
                 ))
             }
             {
-                apiTotalTodoList?.length > 0 && apiTotalTodoList.map((_, index) => (
+                apiTodoList?.length > 0 && apiTodoList.map((_, index) => (
                     <li className='row align-items-center m-0 g-0 gap-1 mt-2 apischedule' key={index}>
                         <input 
                             type='checkbox'

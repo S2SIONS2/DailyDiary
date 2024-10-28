@@ -2,9 +2,9 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 // schedule
-interface Schedule {
-    schedule: string[]
-}
+// interface Schedule {
+//     schedule: string[]
+// }
 
 // to do list
 interface TodoItem {
@@ -19,7 +19,7 @@ interface TodoItem {
 interface CalendarListState {
     id: string,
     date: string,
-    scheduleList: Schedule[],
+    scheduleList: string[],
     todoList: TodoItem[],
     status: 'idle' | 'loading' | 'failed'
 }
@@ -65,11 +65,16 @@ type NewSchedule = {
     schedule: string[]
 }
 
-// 타입 삭제 시
+// 스케줄 삭제 시
 type DeleteSchedule = {
     apiID?: string | undefined,
-    apiScheduleList: string[][]
-    subIndex: number
+    apiScheduleList: string[],
+    i: number
+}
+type DeleteTodo = {
+    apiID?: string | undefined,
+    apiTodoList: TodoItem[],
+    i: number
 }
 
 // api 호출 주소
@@ -89,7 +94,9 @@ export const fetchCalendatList = createAsyncThunk(
         return response.data
     }
 )
+
 // api post
+// api가 없을 때
 // 랜덤 아이디 값 생성
 const getRandomId = () => {
     const now = new Date();
@@ -155,11 +162,11 @@ export const newSchedule = createAsyncThunk(
     }
 )
 
-// api 삭제 시
+// api 스케줄 삭제 시
 export const deleteScheduleList = createAsyncThunk(
     'calendars/deleteSchedule',
-    async ({ apiID, apiScheduleList, subIndex }: DeleteSchedule) => {
-        const newScheduleList =  apiScheduleList[0].filter((_, index) => index !== subIndex);
+    async ({ apiID, apiScheduleList, i }: DeleteSchedule) => {
+        const newScheduleList =  apiScheduleList? apiScheduleList.filter((_, index) => index !== i) : [];
         const params = {
             id: apiID,
             schedule: newScheduleList
@@ -169,6 +176,19 @@ export const deleteScheduleList = createAsyncThunk(
         return response.data;
     }
 );
+
+export const deleteTodoList = createAsyncThunk(
+    'calendars/deleteTodoList',
+    async ({ apiID, apiTodoList, i }: DeleteTodo) => {
+        const newTodoList = apiTodoList? apiTodoList.filter((_, index) => index !== i) : []
+        const params = {
+            id: apiID,
+            todoList: newTodoList
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    } 
+)
 
 // slice 생성
 const scheduleSlice = createSlice({
@@ -196,15 +216,11 @@ const scheduleSlice = createSlice({
             .addCase(newSchedule.fulfilled, (state, action) => {
                 state.scheduleList = [action.payload];
             })
-            .addCase(deleteScheduleList.fulfilled, (state, action) => { // 삭제 시 화면에 삭제 리스트 제외하고 띄움
-                // const updatedSchedule = action.payload;
-                // const index = state.scheduleList.findIndex((schedule) => schedule.id === action.payload.id);
-                // state.scheduleList = [
-                //     ...state.scheduleList.slice(0, index),
-                //     updatedSchedule,
-                //     ...state.scheduleList.slice(index + 1),
-                // ];
-                state.scheduleList = action.payload;
+            .addCase(deleteScheduleList.fulfilled, (state, action) => {
+                state.scheduleList = action.payload.schedule;
+            })
+            .addCase(deleteTodoList.fulfilled, (state, action) => {
+                state.todoList = action.payload.todoList;
             })
     }
 })

@@ -10,67 +10,62 @@ import { faX, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 import moment from 'moment'
 
-interface Schedule {
-    schedule: string[]
-}
-
 interface ScheduleListProps {
     selectedDate: Date | null;
     schedule: string[] | null;
     setSchedule: React.Dispatch<React.SetStateAction<string[]>>;
-    correctionSchedule: Schedule[]
-    setCorrectionSchedule: React.Dispatch<React.SetStateAction<Schedule[]>>;
+    correctionSchedule: string[]
+    setCorrectionSchedule: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, setSchedule, correctionSchedule, setCorrectionSchedule }) => {
+    // api 선택 날짜
     const today = moment(new Date()).format('YYYY-MM-DD');
     const chooseDate = moment(selectedDate).format('YYYY-MM-DD');
-
-    // const apiTotal = useSelector((state: RootState) => state.calendarLists.id)
-    // const apiCalendarList = useSelector((state: RootState) => state.calendarLists);
+    // api list
     const apiScheduleList = useSelector((state: RootState) => state.calendarLists.scheduleList);
     const status = useSelector((state: RootState) => state.calendarLists.status);
-
-    const apiID = useSelector((state: RootState) => state.calendarLists.id) // api list id
-
     const dispatch = useDispatch<AppDispatch>();
-
+    // api list id
+    const apiID = useSelector((state: RootState) => state.calendarLists.id) 
+    
+    // api 호출
     useEffect(() => {
         if (status === 'idle') {
             if (!chooseDate || isNaN(new Date(chooseDate).getTime())) {
                 dispatch(fetchCalendatList({ today }));
-                // console.log(apiID)
             } else {
                 dispatch(fetchCalendatList({ chooseDate }));
-                // console.log(apiID)
             }
         }
+        
     }, [today, chooseDate]);
 
+    // api 추가 할 로컬 스케줄
     const addSchedule = () => {
         setSchedule([...(schedule || []), '']);
     };
-
+    // 로컬 스케줄 삭제
     const deleteSchedule = (i: number) => {
         setSchedule((prev) => prev.filter((_, index) => index !== i));
     };
-
+    // 스케줄 인풋 핸들링
     const onChangeSchedule = (i: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const newScheduleList = [...schedule || []];
         newScheduleList[i] = e.target.value
         setSchedule(newScheduleList)
     }
 
-    // 기존 스케줄 수정 시
+    // 기존 스케줄(api 스케줄) 수정 시
     const handleSchedule = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const newCorrectSchedule = [...correctionSchedule || []]
         newCorrectSchedule[index] = e.target.value
         setCorrectionSchedule(newCorrectSchedule)
     };
-
-    const deleteApi = (index: number) => {
+    // api
+    const deleteApi = (i: number) => {
         if( confirm('일정이 삭제됩니다. 진행 하시겠습니까?') == true){
-            dispatch(deleteScheduleList({ apiID, apiScheduleList, index }))
+            dispatch(deleteScheduleList({ apiID, apiScheduleList, i }))
         }
     };
 
@@ -104,7 +99,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ selectedDate, schedule, set
                     </li>
                 ))}
                 {
-                    apiScheduleList != undefined && apiScheduleList.map((_, index) => (
+                    apiScheduleList && apiScheduleList.length > 0 && apiScheduleList.map((_, index) => (
                         <li key={index} className="mt-2 w-100 row align-items-center gap-2 p-0 g-0">
                             <input
                                 type='text'
