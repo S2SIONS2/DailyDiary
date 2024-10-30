@@ -70,200 +70,174 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
 
     // api 스케줄, to do list 저장
     const confirmBtn = async () => {
-        // calendar api에 기록이 없을 때
-        if(apiCalendarList.id == null || apiCalendarList.id == undefined){
+        // API 여부 체크
+        const hasApiCalendarListId = apiCalendarList.id != null;
+        // 스케줄 추가 여부
+        const hasSchedule = schedule[0] !== '';
+        // 투두 리스트 추가 여부
+        const hasToDoList = toDoList[0].content !== '';
+        // API 스케줄 존재 여부
+        const hasApiScheduleList = apiScheduleList && apiScheduleList.length > 0;
+        // API 투두 리스트 존재 여부
+        const hasApiTodoList = apiTodoList && apiTodoList.length > 0;
+        // 스케줄이 수정되었을 때
+        const isScheduleChanged =
+          JSON.stringify(apiScheduleList) !== JSON.stringify(correctionSchedule);
+        // 투두 리스트가 수정되었을 때
+        const isTodoChanged =
+          JSON.stringify(apiTodoList) !== JSON.stringify(correctionTodos);
+      
+        const resetForm = async () => {
+          setSchedule(['']);
+          setToDoList([{ checked: false, content: '' }]);
+          await dispatch(fetchCalendatList({ today, chooseDate }));
+        };
+      
+        // Calendar API에 기록이 없을 때
+        if (!hasApiCalendarListId) {
+          if (hasSchedule && !hasToDoList) {
             // 스케줄만 추가
-            if(schedule[0] != '' && toDoList[0].content == ''){
-                await dispatch(addSchedules({today, chooseDate, schedule}))
-                setSchedule([''])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return
-            }
-            // 투 두 리스트만 추가
-            if(schedule[0] == '' && toDoList[0].content != ''){
-                await dispatch(addTodoLists({today, chooseDate, toDoList}))
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return
-            }
-            // 둘 다 동시에 추가
-            if(schedule[0] != '' && toDoList[0].content != ''){
-                await dispatch(addCalendar({today, chooseDate, schedule, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }]);
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return
-            }
-        // calendar api가 있을 때
-        }else if(apiCalendarList.id){
-            // 기존 데이터를 삭제 후 스케줄 + 투 두 리스트가 [] 일 때
-            if(apiScheduleList.length == 0 && apiTodoList.length == 0){
-                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                return;
-            }
-            // 기존 데이터를 삭제 후 스케줄이 [] 일 때 스케줄 추가
-            if(apiScheduleList.length == 0){
-                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-                setSchedule(['']);
-                return;
-            }
-            // 기존 데이터를 삭제 후 투 두 리스트가 [] 일 때
-            if(apiTodoList.length == 0){
-                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 기존 스케줄만 있을 때 투 두 리스트 첫 추가
-            if(apiScheduleList?.length > 0 && apiTodoList == undefined && toDoList[0].content != ''){
-                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 기존 투 두 리스트만 있을 때 스케줄 첫 추가
-            if(apiTodoList?.length > 0 && apiScheduleList == undefined && schedule[0]!= ''){
-                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-                setSchedule(['']);
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 스케줄, 투 두 리스트 수정
-            if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] == '' && toDoList[0].content == '') {
-                await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
-                await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 새 스케줄 추가 + 스케줄 추가 && 투 두 리스트 수정
-            if(apiScheduleList.length > 0 && 
-                schedule[0] != '' && 
-                JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule) && 
-                toDoList[0].content == ''
-            ){
-                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-                await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 스케줄 수정 + 새 스케줄 추가 && 스케줄 수정 + 추가 + 투 두 리스트 수정
-            if(apiScheduleList.length > 0 && 
-                correctionSchedule && 
-                schedule[0] != '' && 
-                toDoList[0].content == ''
-            ){
-                await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
-                await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 스케줄 추가 + 투 두 리스트 추가
-            if(apiScheduleList.length > 0 && 
-                schedule[0] != '' && 
-                JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule) && 
-                toDoList[0].content != '' && 
-                JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos)
-            ){
-                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
-            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 추가
-            if(apiScheduleList.length > 0 &&
-                JSON.stringify(apiScheduleList) !== JSON.stringify(correctionSchedule) &&
-                schedule[0] != '' &&
-                toDoList[0].content != ''
-            ){
-                await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
-                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return
-            }
-            // 투 두 리스트 추가
-            if(apiTodoList.length > 0 && toDoList[0].content != '' && JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos)) {
-                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return
-            }
-            // 투 두 리스트 수정 + 추가 + 스케줄 수정
-            if(apiTodoList.length > 0 &&
-                correctionTodos &&
-                toDoList[0].content != '' &&
-                JSON.stringify(apiScheduleList) !== JSON.stringify(correctionSchedule) &&
-                schedule[0] == ''
-            ){
-                await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList}))
-                await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return
-            }
-            // 투 두 리스트 수정 + 투 두 리스트 추가 && 스케줄 수정 + 추가 + 투 두 리스트 수정 + 추가
-            if(apiTodoList.length > 0 && correctionTodos && toDoList[0].content != ''){
-                await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
-                await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList}))
-                setSchedule(['']);
-                setToDoList([{
-                    checked: false,
-                    content: ''
-                }])
-                await dispatch(fetchCalendatList({today, chooseDate}))
-                return;
-            }
+            await dispatch(addSchedules({ today, chooseDate, schedule }));
+            console.log(1);
+          } else if (!hasSchedule && hasToDoList) {
+            // 투두 리스트만 추가
+            await dispatch(addTodoLists({ today, chooseDate, toDoList }));
+            console.log(2);
+          } else if (hasSchedule && hasToDoList) {
+            // 둘 다 추가
+            await dispatch(addCalendar({ today, chooseDate, schedule, toDoList }));
+            console.log(3);
+          }
+          await resetForm();
+          return;
         }
-    }
+      
+        // Calendar API에 기록이 있을 때
+        if (
+          hasApiScheduleList &&
+          !hasApiTodoList &&
+          hasToDoList &&
+          correctionSchedule &&
+          hasSchedule
+        ) {
+          // 스케줄 수정 + 투두 리스트 첫 추가
+          await dispatch(
+            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
+          );
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log('스케줄 수정 + 투두 리스트 첫 추가');
+        } else if (hasApiScheduleList && !hasApiTodoList && hasToDoList) {
+          // 기존 스케줄만 있고 투두 리스트 첫 추가
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log(7);
+        } else if (hasApiTodoList && !hasApiScheduleList && hasSchedule && !isTodoChanged) {
+          // 기존 투두 리스트만 있고 스케줄 첫 추가 및 투 두 리스트 추가
+          await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }));
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+          console.log(8);
+        } else if (
+          hasApiScheduleList &&
+          correctionSchedule &&
+          !hasSchedule &&
+          !hasToDoList
+        ) {
+          // 스케줄 및 투두 리스트 수정
+          await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule }));
+          await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList }));
+          console.log(9);
+        } else if (
+          hasApiScheduleList &&
+          hasSchedule &&
+          !isScheduleChanged &&
+          !hasToDoList
+        ) {
+          // 스케줄 추가 및 투두 리스트 수정
+          await dispatch(
+            updateSchedule({ apiID, apiDate, apiScheduleList, schedule })
+          );
+          await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList }));
+          console.log(10);
+        } else if (
+          hasApiScheduleList &&
+          correctionSchedule &&
+          hasSchedule &&
+          !hasToDoList
+        ) {
+          // 스케줄 수정 및 추가, 투두 리스트 수정
+          await dispatch(
+            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
+          );
+          await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList }));
+          console.log(11);
+        } else if (
+          hasApiScheduleList &&
+          hasSchedule &&
+          !isScheduleChanged &&
+          hasToDoList &&
+          !isTodoChanged
+        ) {
+          // 스케줄 및 투두 리스트 추가
+          await dispatch(
+            updateSchedule({ apiID, apiDate, apiScheduleList, schedule })
+          );
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log(12);
+        } else if (
+          hasApiScheduleList &&
+          isScheduleChanged &&
+          hasSchedule &&
+          hasToDoList
+        ) {
+          // 스케줄 수정 및 추가, 투두 리스트 추가
+          await dispatch(
+            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
+          );
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log(13);
+        } else if (hasApiTodoList && hasToDoList && !isTodoChanged && !isScheduleChanged) {
+          // 투두 리스트 추가
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log(14);
+        } else if (
+          hasApiTodoList &&
+          correctionTodos &&
+          hasToDoList &&
+          isScheduleChanged &&
+          !hasSchedule
+        ) {
+          // 투두 리스트 수정 및 추가, 스케줄 수정
+          await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList }));
+          await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule }));
+          console.log(15);
+        } else if (hasApiTodoList && correctionTodos && hasToDoList) {
+          // 스케줄 및 투두 리스트 수정 및 추가
+          await dispatch(
+            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
+          );
+          await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList }));
+          console.log(16);
+        } else if (
+          (!hasApiScheduleList || apiScheduleList.length === 0) &&
+          (!hasApiTodoList || apiTodoList.length === 0)
+        ) {
+          // 기존 데이터 삭제 후 스케줄과 투두 리스트가 비어있을 때
+          await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }));
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log(4);
+        }else if(isTodoChanged && !isScheduleChanged && !hasSchedule && !hasToDoList) {
+          // 투 두 리스트 수정 시
+          await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
+        } else if (!hasApiScheduleList || apiScheduleList.length === 0) {
+          // 기존 데이터 삭제 후 스케줄이 비어있을 때 스케줄 추가
+          await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }));
+          console.log(5);
+        } else if (!hasApiTodoList || apiTodoList.length === 0) {
+          // 기존 데이터 삭제 후 투두 리스트가 비어있을 때
+          await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
+          console.log(6);
+        }
+        await resetForm();
+      };
     
     if (isLoading) {
         return <Loading />
