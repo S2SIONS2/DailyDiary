@@ -66,8 +66,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             setCorrectionTodos(apiTodoList || [])
             setIsLoading(false);
         }
-        console.log(apiScheduleList)
-        console.log(apiTodoList)
     }, [apiTodoList, apiScheduleList])
 
     // api 스케줄, to do list 저장
@@ -113,14 +111,12 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     checked: false,
                     content: ''
                 }])
-                console.log(0)
                 return;
             }
             // 기존 데이터를 삭제 후 스케줄이 [] 일 때 스케줄 추가
             if(apiScheduleList.length == 0){
                 await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
                 setSchedule(['']);
-                console.log(1)
                 return;
             }
             // 기존 데이터를 삭제 후 투 두 리스트가 [] 일 때
@@ -130,7 +126,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     checked: false,
                     content: ''
                 }])
-                console.log(2)
                 await dispatch(fetchCalendatList({today, chooseDate}))
                 return;
             }
