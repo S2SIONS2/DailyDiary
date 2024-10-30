@@ -326,6 +326,7 @@ const scheduleSlice = createSlice({
             // 기존 api에 스케줄만 추가 시
             .addCase(updateSchedule.fulfilled, (state, action) => {
                 state.scheduleList = action.payload.schedule;
+                state.todoList = action.payload.todoList
             })
             // 기존 api에 스케줄만 수정 시
             .addCase(correctSchedule.fulfilled, (state, action) => {
@@ -343,9 +344,11 @@ const scheduleSlice = createSlice({
             // 기존 api에 투 두 리스트 추가
             .addCase(updateTodos.fulfilled, (state, action) => {
                 state.todoList = action.payload.todoList
+                state.scheduleList = action.payload.schedule;
             })
             // 기존 api에 투 두 리스트 수정
             .addCase(correctTodo.fulfilled, (state, action) => {
+                state.scheduleList = action.payload.schedule;
                 state.todoList = action.payload.todoList;
             })
             .addCase(newTodo.fulfilled, (state,action) => {

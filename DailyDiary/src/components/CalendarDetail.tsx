@@ -72,35 +72,37 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     }, [apiTodoList, apiScheduleList])
 
     // api 스케줄, to do list 저장
-    const confirmBtn = () => {
+    const confirmBtn = async () => {
         // calendar api에 기록이 없을 때
         if(apiCalendarList.id == null || apiCalendarList.id == undefined){
             // 스케줄만 추가
             if(schedule[0] != '' && toDoList[0].content == ''){
-                dispatch(addSchedules({today, chooseDate, schedule}))
+                await dispatch(addSchedules({today, chooseDate, schedule}))
                 setSchedule([''])
-                dispatch(fetchCalendatList({today, chooseDate}))
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(1)
                 return
             }
             // 투 두 리스트만 추가
             if(schedule[0] == '' && toDoList[0].content != ''){
-                dispatch(addTodoLists({today, chooseDate, toDoList}))
+                await dispatch(addTodoLists({today, chooseDate, toDoList}))
                 setToDoList([{
                     checked: false,
                     content: ''
                 }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(2)
                 return
             }
             // 둘 다 동시에 추가
             if(schedule[0] != '' && toDoList[0].content != ''){
-                dispatch(addCalendar({today, chooseDate, schedule, toDoList}))
+                await dispatch(addCalendar({today, chooseDate, schedule, toDoList}))
                 setSchedule(['']);
                 setToDoList([{
                     checked: false,
                     content: ''
                 }]);
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(3)
                 return
             }
@@ -108,77 +110,144 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
         }else if(apiCalendarList.id){
             // 기존 스케줄만 있을 때 투 두 리스트 첫 추가
             if(apiScheduleList?.length > 0 && apiTodoList == undefined && toDoList[0].content != ''){
-                dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
                 setToDoList([{
                     checked: false,
                     content: ''
                 }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(4)
                 return;
             }
             // 기존 투 두 리스트만 있을 때 스케줄 첫 추가
             if(apiTodoList?.length > 0 && apiScheduleList == undefined && schedule[0]!= ''){
-                dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
                 setSchedule(['']);
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(5)
                 return;
             }
             // 스케줄, 투 두 리스트 수정
             if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] == '' && toDoList[0].content == '') {
-                dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
-                dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
+                await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
+                await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
                 setSchedule(['']);
                 setToDoList([{
                     checked: false,
                     content: ''
                 }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(6)
                 return;
             }
-            // 새 스케줄 추가
-            if(apiScheduleList.length > 0 && schedule[0] != '' && JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule) && toDoList[0].content == ''){
-                dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+            // 새 스케줄 추가 + 스케줄 추가 && 투 두 리스트 수정
+            if(apiScheduleList.length > 0 && 
+                schedule[0] != '' && 
+                JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule) && 
+                toDoList[0].content == ''
+            ){
+                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
                 setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(7)
                 return;
             }
-            // 스케줄 수정 + 새 스케줄 추가
-            if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] != ''){
-                dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
+            // 스케줄 수정 + 새 스케줄 추가 && 스케줄 수정 + 추가 + 투 두 리스트 수정
+            if(apiScheduleList.length > 0 && 
+                correctionSchedule && 
+                schedule[0] != '' && 
+                toDoList[0].content == ''
+            ){
+                await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
+                await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
                 setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(8)
                 return;
             }
-            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 수정
-            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 추가
-            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 수정 + 새 투 두 리스트 추가
-            // 투 두 리스트 수정
-            // if(apiTodoList.length > 0 && correctionTodos && toDoList[0].content == '' && schedule[0] == '') {
-            //     dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
-            //     setToDoList([{
-            //         checked: false,
-            //         content: ''
-            //     }])
-            //     console.log(9)
-            //     return
-            // }
-            // 투 두 리스트 추가
-            if(apiTodoList.length > 0 && toDoList[0].content != '' && JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos)) {
-                dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+            // 스케줄 추가 + 투 두 리스트 추가
+            if(apiScheduleList.length > 0 && 
+                schedule[0] != '' && 
+                JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule) && 
+                toDoList[0].content != '' && 
+                JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos)
+            ){
+                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setSchedule(['']);
                 setToDoList([{
                     checked: false,
                     content: ''
                 }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
+                console.log(11)
+                return;
+            }
+            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 추가
+            if(apiScheduleList.length > 0 &&
+                JSON.stringify(apiScheduleList) !== JSON.stringify(correctionSchedule) &&
+                schedule[0] != '' &&
+                toDoList[0].content != ''
+            ){
+                await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
+                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
+                console.log('스케줄 수정 추가 + 투 두 리스트 추가')
+                return
+            }
+            // 투 두 리스트 추가
+            if(apiTodoList.length > 0 && toDoList[0].content != '' && JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos)) {
+                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(9)
                 return
             }
-            // 투 두 리스트 수정 + 투 두 리스트 추가
-            if(apiTodoList.length > 0 && correctionTodos && toDoList[0].content != ''){
-                dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList}))
+            // 투 두 리스트 수정 + 추가 + 스케줄 수정
+            if(apiTodoList.length > 0 &&
+                correctionTodos &&
+                toDoList[0].content != '' &&
+                JSON.stringify(apiScheduleList) !== JSON.stringify(correctionSchedule) &&
+                schedule[0] == ''
+            ){
+                await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList}))
+                await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
+                setSchedule(['']);
                 setToDoList([{
                     checked: false,
                     content: ''
                 }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
+                console.log('리스트 수정 추가 + 스케줄 수정')
+                return
+            }
+            // 투 두 리스트 수정 + 투 두 리스트 추가 && 스케줄 수정 + 추가 + 투 두 리스트 수정 + 추가
+            if(apiTodoList.length > 0 && correctionTodos && toDoList[0].content != ''){
+                await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
+                await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList}))
+                setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                await dispatch(fetchCalendatList({today, chooseDate}))
                 console.log(10)
                 return;
             }
