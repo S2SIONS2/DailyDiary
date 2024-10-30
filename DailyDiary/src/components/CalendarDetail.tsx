@@ -7,7 +7,7 @@ import ScheduleList from './ScheduleList';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { addSchedules, correctSchedule, newSchedule, updateSchedule } from '../features/api/CalendarSlice';
+import { addCalendar, addSchedules, addTodoLists, correctSchedule, newSchedule, updateSchedule } from '../features/api/CalendarSlice';
 
 import Loading from "../pages/Loading";
 
@@ -42,7 +42,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
     const dispatch = useDispatch<AppDispatch>();
     
     // api 스케줄 체크
-    // const apiCalendarList = useSelector((state: RootState) => state.calendarLists);
+    const apiCalendarList = useSelector((state: RootState) => state.calendarLists);
     const apiScheduleList = useSelector((state: RootState) => state.calendarLists.scheduleList)
 
     // api to do list 체크
@@ -66,34 +66,67 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             setCorrectionTodos(apiTodoList || [])
             setIsLoading(false);
         }
+        console.log(correctionSchedule)
+        console.log(apiScheduleList)
+        console.log(JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule));
     }, [apiTodoList, apiScheduleList])
 
-    // api 스케줄 저장
-    // const confirmBtn = () => {
-    //     // api 스케줄이 없고 날짜가 오늘 일 때
-    //     if(apiScheduleList.length == 0 && schedule){
-    //         dispatch(addSchedules({ today, chooseDate, schedule }))
-    //         setSchedule([]);
-    //         return;
-    //     }
-    //     // api 스케줄 수정 시
-    //     if(apiScheduleList.length > 0 && correctionSchedule && schedule.length == 0) {
-    //         dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
-    //         return;
-    //     }
-    //     // api 스케줄 추가 시
-    //     if(apiScheduleList.length > 0 && schedule.length > 0 && correctionSchedule.length == 0){
-    //         dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-    //         setSchedule([]);
-    //         return;
-    //     }
-    //     // api 스케줄 수정과 추가 시
-    //     if(apiScheduleList.length > 0 && correctionSchedule && schedule) {
-    //         dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
-    //         setSchedule([]);
-    //         return;
-    //     }
-    // }
+    // api 스케줄, to do list 저장
+    const confirmBtn = () => {
+        // calendar api에 기록이 없을 때
+        if(apiCalendarList.id == null || apiCalendarList.id == undefined){
+            // 스케줄만 추가
+            if(schedule[0] != '' && toDoList[0].content == ''){
+                dispatch(addSchedules({today, chooseDate, schedule}))
+                setSchedule([''])
+                console.log(0)
+                return
+            }
+            // 투 두 리스트만 추가
+            if(schedule[0] == '' && toDoList[0].content != ''){
+                dispatch(addTodoLists({today, chooseDate, toDoList}))
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(1)
+                return
+            }
+            // 둘 다 동시에 추가
+            if(schedule[0] != '' && toDoList[0].content != ''){
+                dispatch(addCalendar({today, chooseDate, schedule, toDoList}))
+                console.log(2)
+                return
+            }
+        // calendar api가 있을 때
+        }else if(apiCalendarList.id){
+            // 스케줄 수정
+            if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] == '') {
+                dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
+                console.log(3)
+                return;
+            }
+            // 새 스케줄 추가
+            if(apiScheduleList.length > 0 && schedule[0] != '' && JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule)){
+                dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                setSchedule([]);
+                console.log(4)
+                return;
+            }
+            // 스케줄 수정 + 새 스케줄 추가
+            if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] != ''){
+                dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
+                setSchedule([]);
+                console.log(5)
+                return;
+            }
+            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 수정
+            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 수정 + 새 투 두 리스트 추가
+            // 투 두 리스트 수정
+            // 투 두 리스트 추가
+            // 투 두 리스트 수정 + 투 두 리스트 추가
+        }
+    }
 
     if (isLoading) {
         return <Loading />

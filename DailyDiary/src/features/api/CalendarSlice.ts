@@ -1,19 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-// schedule
-// interface Schedule {
-//     schedule: string[]
-// }
-
 // to do list
 interface TodoItem {
     checked: boolean,
     content: string
 }
-// interface TodoList {
-//     todoList: TodoItem[]
-// }
 
 // 공통 
 interface CalendarListState {
@@ -32,17 +24,30 @@ const initialState: CalendarListState = {
     status: 'idle'
 }
 
-// 스케줄 검색 타입 정의
+// api 검색 타입 정의
 type SearchLists = {
     today? : string,
     chooseDate? : string
 }
-// 스케줄 추가 시 타입 정의
-type ScheduleList = {
-    id?: string;
-    today?: string;
-    chooseDate?: string;
-    schedule: string[];
+
+// api 생성 타입 정의
+type CreateAPI = {
+    today?: string,
+    chooseDate?: string,
+    schedule: string[],
+    toDoList: TodoItem[]
+}
+// 스케줄만 생성
+type CreateSchedule = {
+    today?: string,
+    chooseDate?: string,
+    schedule: string[],
+}
+// 투 두 리스트만 생성
+type CreateToDoList = {
+    today?: string,
+    chooseDate?: string,
+    toDoList: TodoItem[]
 }
 // 기존 스케줄 수정 시 타입 정의
 type CorrectSchedule = {
@@ -104,14 +109,44 @@ const getRandomId = () => {
     const randomNum = Math.floor(Math.random() * 10000)
     return `${timeStamp} - ${randomNum}`
 }
+// 스케줄, 투 두 리스트가 둘 다 동시에 생성 될 때
+export const addCalendar = createAsyncThunk(
+    'calendars/addCalendars',
+    async({today, chooseDate, schedule, toDoList }: CreateAPI) => {
+        const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
+        const params = {
+            id: getRandomId(),
+            date: dateParam,
+            schedule: schedule,
+            todoList: toDoList
+        }
+        const response = await axios.post(url, params)
+        return response.data
+    }
+)
+// 스케줄만 생성될 때
 export const addSchedules = createAsyncThunk(
-    'calendars/addScheduless',
-    async ({today, chooseDate, schedule}: ScheduleList) => {
+    'calendars/addSchedules',
+    async ({today, chooseDate, schedule}: CreateSchedule) => {
         const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
         const params = {
             id: getRandomId(),
             date: dateParam,
             schedule: schedule
+        }
+        const response = await axios.post(url, params)
+        return response.data
+    }
+)
+// 투 두 리스트만 생성될 때
+export const addTodoLists = createAsyncThunk(
+    'calendars/addTodoLists',
+    async({ today, chooseDate, toDoList }: CreateToDoList) => {
+        const dateParam = (!chooseDate || isNaN(new Date(chooseDate).getTime())) ? today : chooseDate;
+        const params = {
+            id: getRandomId(),
+            date: dateParam,
+            todoList: toDoList
         }
         const response = await axios.post(url, params)
         return response.data
@@ -136,7 +171,7 @@ export const correctSchedule = createAsyncThunk(
 export const updateSchedule = createAsyncThunk(
     'calendars/updateSchedule',
     async ({ apiID, apiDate, apiScheduleList, schedule }: UpdateSchedule) => {
-        const updatedSchedule = [...apiScheduleList[0] || [], ...schedule]
+        const updatedSchedule = [...apiScheduleList || [], ...schedule]
         const params = {
             id: apiID,
             date: apiDate,
@@ -197,6 +232,7 @@ const scheduleSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // 리스트 불러옴 
             .addCase(fetchCalendatList.pending, (state) => {
                 state.status = 'loading'
             })
@@ -207,18 +243,36 @@ const scheduleSlice = createSlice({
                 state.scheduleList = action.payload[0]?.schedule ;
                 state.todoList = action.payload[0]?.todoList; 
             })
+            // 새로 api 생성 시
+            .addCase(addCalendar.fulfilled, (state, action) => {
+                state.scheduleList.push(action.payload)
+                state.todoList.push(action.payload)
+            })
+            // 새로 api - 스케줄만 생성 시
             .addCase(addSchedules.fulfilled, (state, action) => {
-                state.scheduleList.push(action.payload);
+                state.scheduleList = action.payload.schedule;
             })
-            .addCase(updateSchedule.fulfilled, (state, action) => {
-                state.scheduleList = [action.payload];
+            // 새로 api - 투 두 리스트만 생성 시
+            .addCase(addTodoLists.fulfilled, (state, action) => {
+                state.todoList = action.payload.todoList;
             })
+            // 새 api - 스케줄 + 투 두 리스트 동시 생성 시
             .addCase(newSchedule.fulfilled, (state, action) => {
-                state.scheduleList = [action.payload];
+                state.scheduleList = action.payload.schedule;
             })
+            // 기존 api에 스케줄만 추가 시
+            .addCase(updateSchedule.fulfilled, (state, action) => {
+                state.scheduleList = action.payload.schedule;
+            })
+            // 기존 api에 스케줄 수정 시
+            .addCase(correctSchedule.fulfilled, (state, action) => {
+                state.scheduleList = action.payload.schedule;
+            })
+            // 기존 api에 스케줄 삭제
             .addCase(deleteScheduleList.fulfilled, (state, action) => {
                 state.scheduleList = action.payload.schedule;
             })
+            // 기존 api에 투 두 리스트 삭제
             .addCase(deleteTodoList.fulfilled, (state, action) => {
                 state.todoList = action.payload.todoList;
             })
