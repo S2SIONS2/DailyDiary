@@ -69,13 +69,35 @@ type NewSchedule = {
     correctionSchedule: string[],
     schedule: string[]
 }
-
 // 스케줄 삭제 시
 type DeleteSchedule = {
     apiID?: string | undefined,
     apiScheduleList: string[],
     i: number
 }
+
+// 투 두 리스트 추가 시
+type UpdateTodo = {
+    apiID?: string | undefined,
+    apiDate? : string | undefined,
+    apiTodoList: TodoItem[],
+    toDoList: TodoItem[]
+}
+// 투 두 리스트 수정 시
+type CorrectTodos = {
+    apiID?: string | undefined,
+    apiDate? : string | undefined,
+    correctionTodos: TodoItem[],
+    toDoList: TodoItem[]
+}
+// 투 두 리스트 추가 + 수정
+type NewTodoList = {
+    apiID?: string | undefined,
+    apiDate?: string | undefined,
+    correctionTodos: TodoItem[],
+    toDoList: TodoItem[]
+}
+// 투 두 리스트 삭제 시
 type DeleteTodo = {
     apiID?: string | undefined,
     apiTodoList: TodoItem[],
@@ -182,7 +204,7 @@ export const updateSchedule = createAsyncThunk(
     }
 )
 
-// 기존 api 수정과 추가 동시에 이루어질 때
+// 기존 api 스케줄 수정과 추가 동시에 이루어질 때
 export const newSchedule = createAsyncThunk(
     'calendars/newSchedule',
     async ( { apiID, apiDate, correctionSchedule, schedule}: NewSchedule) => {
@@ -212,6 +234,48 @@ export const deleteScheduleList = createAsyncThunk(
     }
 );
 
+// 투 두 리스트 추가 시
+export const updateTodos = createAsyncThunk(
+    'calendars/updateTodos',
+    async ({ apiID, apiDate, apiTodoList, toDoList }: UpdateTodo) => {
+        const updatedSchedule = [...apiTodoList || [], ...toDoList]
+        const params = {
+            id: apiID,
+            date: apiDate,
+            todoList: updatedSchedule
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    }
+)
+// 투 두 리스트 수정 시
+export const correctTodo = createAsyncThunk(
+    'calendars/correctTodos',
+    async ({ apiID, apiDate, correctionTodos = [] }: CorrectTodos) => {
+        const params = {
+            id: apiID,
+            date: apiDate,
+            todoList: correctionTodos
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    }
+)
+// 기존 api 투 두 리스트 수정과 추가 동시에 이루어질 때
+export const newTodo = createAsyncThunk(
+    'calendars/newTodo',
+    async ( { apiID, apiDate, correctionTodos, toDoList}: NewTodoList) => {
+        const newTodoList = [...correctionTodos || [], ...toDoList]
+        const params = {
+            id: apiID,
+            date: apiDate,
+            todoList: newTodoList
+        }
+        const response = await axios.patch(url + `/${apiID}`, params)
+        return response.data
+    }
+)
+// api 투 두 리스트 삭제 시
 export const deleteTodoList = createAsyncThunk(
     'calendars/deleteTodoList',
     async ({ apiID, apiTodoList, i }: DeleteTodo) => {
@@ -243,10 +307,12 @@ const scheduleSlice = createSlice({
                 state.scheduleList = action.payload[0]?.schedule ;
                 state.todoList = action.payload[0]?.todoList; 
             })
-            // 새로 api 생성 시
+
+            // 새로 api 생성 시 
+            // 스케줄 + 투 두 리스트
             .addCase(addCalendar.fulfilled, (state, action) => {
-                state.scheduleList.push(action.payload)
-                state.todoList.push(action.payload)
+                state.scheduleList = action.payload.schedule;
+                state.todoList = action.payload.todoList;
             })
             // 새로 api - 스케줄만 생성 시
             .addCase(addSchedules.fulfilled, (state, action) => {
@@ -256,21 +322,34 @@ const scheduleSlice = createSlice({
             .addCase(addTodoLists.fulfilled, (state, action) => {
                 state.todoList = action.payload.todoList;
             })
-            // 새 api - 스케줄 + 투 두 리스트 동시 생성 시
-            .addCase(newSchedule.fulfilled, (state, action) => {
-                state.scheduleList = action.payload.schedule;
-            })
+            
             // 기존 api에 스케줄만 추가 시
             .addCase(updateSchedule.fulfilled, (state, action) => {
                 state.scheduleList = action.payload.schedule;
             })
-            // 기존 api에 스케줄 수정 시
+            // 기존 api에 스케줄만 수정 시
             .addCase(correctSchedule.fulfilled, (state, action) => {
                 state.scheduleList = action.payload.schedule;
             })
             // 기존 api에 스케줄 삭제
             .addCase(deleteScheduleList.fulfilled, (state, action) => {
                 state.scheduleList = action.payload.schedule;
+            })
+            // 기존 api - 스케줄 수정 + 추가
+            .addCase(newSchedule.fulfilled, (state, action) => {
+                state.scheduleList = action.payload.schedule;
+            })
+
+            // 기존 api에 투 두 리스트 추가
+            .addCase(updateTodos.fulfilled, (state, action) => {
+                state.todoList = action.payload.todoList
+            })
+            // 기존 api에 투 두 리스트 수정
+            .addCase(correctTodo.fulfilled, (state, action) => {
+                state.todoList = action.payload.todoList;
+            })
+            .addCase(newTodo.fulfilled, (state,action) => {
+                state.todoList = action.payload.todoList
             })
             // 기존 api에 투 두 리스트 삭제
             .addCase(deleteTodoList.fulfilled, (state, action) => {

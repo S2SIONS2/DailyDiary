@@ -7,7 +7,7 @@ import ScheduleList from './ScheduleList';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../app/store';
-import { addCalendar, addSchedules, addTodoLists, correctSchedule, newSchedule, updateSchedule } from '../features/api/CalendarSlice';
+import { addCalendar, addSchedules, addTodoLists, correctSchedule, correctTodo, fetchCalendatList, newSchedule, newTodo, updateSchedule, updateTodos } from '../features/api/CalendarSlice';
 
 import Loading from "../pages/Loading";
 
@@ -66,9 +66,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             setCorrectionTodos(apiTodoList || [])
             setIsLoading(false);
         }
-        console.log(correctionSchedule)
-        console.log(apiScheduleList)
-        console.log(JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule));
+        // console.log(apiTodoList?.length > 0)
+        // console.log(toDoList[0].content != '')
+        // console.log(JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos))
     }, [apiTodoList, apiScheduleList])
 
     // api 스케줄, to do list 저장
@@ -79,7 +79,8 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             if(schedule[0] != '' && toDoList[0].content == ''){
                 dispatch(addSchedules({today, chooseDate, schedule}))
                 setSchedule([''])
-                console.log(0)
+                dispatch(fetchCalendatList({today, chooseDate}))
+                console.log(1)
                 return
             }
             // 투 두 리스트만 추가
@@ -89,45 +90,102 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     checked: false,
                     content: ''
                 }])
-                console.log(1)
+                console.log(2)
                 return
             }
             // 둘 다 동시에 추가
             if(schedule[0] != '' && toDoList[0].content != ''){
                 dispatch(addCalendar({today, chooseDate, schedule, toDoList}))
-                console.log(2)
+                setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }]);
+                console.log(3)
                 return
             }
         // calendar api가 있을 때
         }else if(apiCalendarList.id){
-            // 스케줄 수정
-            if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] == '') {
+            // 기존 스케줄만 있을 때 투 두 리스트 첫 추가
+            if(apiScheduleList?.length > 0 && apiTodoList == undefined && toDoList[0].content != ''){
+                dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(4)
+                return;
+            }
+            // 기존 투 두 리스트만 있을 때 스케줄 첫 추가
+            if(apiTodoList?.length > 0 && apiScheduleList == undefined && schedule[0]!= ''){
+                dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                setSchedule(['']);
+                console.log(5)
+                return;
+            }
+            // 스케줄, 투 두 리스트 수정
+            if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] == '' && toDoList[0].content == '') {
                 dispatch(correctSchedule({ apiID, apiDate, correctionSchedule}))
-                console.log(3)
+                dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
+                setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(6)
                 return;
             }
             // 새 스케줄 추가
-            if(apiScheduleList.length > 0 && schedule[0] != '' && JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule)){
+            if(apiScheduleList.length > 0 && schedule[0] != '' && JSON.stringify(apiScheduleList) === JSON.stringify(correctionSchedule) && toDoList[0].content == ''){
                 dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
-                setSchedule([]);
-                console.log(4)
+                setSchedule(['']);
+                console.log(7)
                 return;
             }
             // 스케줄 수정 + 새 스케줄 추가
             if(apiScheduleList.length > 0 && correctionSchedule && schedule[0] != ''){
                 dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule}))
-                setSchedule([]);
-                console.log(5)
+                setSchedule(['']);
+                console.log(8)
                 return;
             }
             // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 수정
+            // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 추가
             // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 수정 + 새 투 두 리스트 추가
             // 투 두 리스트 수정
+            // if(apiTodoList.length > 0 && correctionTodos && toDoList[0].content == '' && schedule[0] == '') {
+            //     dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
+            //     setToDoList([{
+            //         checked: false,
+            //         content: ''
+            //     }])
+            //     console.log(9)
+            //     return
+            // }
             // 투 두 리스트 추가
+            if(apiTodoList.length > 0 && toDoList[0].content != '' && JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos)) {
+                dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(9)
+                return
+            }
             // 투 두 리스트 수정 + 투 두 리스트 추가
+            if(apiTodoList.length > 0 && correctionTodos && toDoList[0].content != ''){
+                dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList}))
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(10)
+                return;
+            }
         }
+        console.log(100)
     }
-
+    
     if (isLoading) {
         return <Loading />
     }
