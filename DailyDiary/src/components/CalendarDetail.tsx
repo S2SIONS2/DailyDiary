@@ -66,9 +66,8 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
             setCorrectionTodos(apiTodoList || [])
             setIsLoading(false);
         }
-        // console.log(apiTodoList?.length > 0)
-        // console.log(toDoList[0].content != '')
-        // console.log(JSON.stringify(apiTodoList) === JSON.stringify(correctionTodos))
+        console.log(apiScheduleList)
+        console.log(apiTodoList)
     }, [apiTodoList, apiScheduleList])
 
     // api 스케줄, to do list 저장
@@ -80,7 +79,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                 await dispatch(addSchedules({today, chooseDate, schedule}))
                 setSchedule([''])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(1)
                 return
             }
             // 투 두 리스트만 추가
@@ -91,7 +89,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(2)
                 return
             }
             // 둘 다 동시에 추가
@@ -103,11 +100,40 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }]);
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(3)
                 return
             }
         // calendar api가 있을 때
         }else if(apiCalendarList.id){
+            // 기존 데이터를 삭제 후 스케줄 + 투 두 리스트가 [] 일 때
+            if(apiScheduleList.length == 0 && apiTodoList.length == 0){
+                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setSchedule(['']);
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(0)
+                return;
+            }
+            // 기존 데이터를 삭제 후 스케줄이 [] 일 때 스케줄 추가
+            if(apiScheduleList.length == 0){
+                await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
+                setSchedule(['']);
+                console.log(1)
+                return;
+            }
+            // 기존 데이터를 삭제 후 투 두 리스트가 [] 일 때
+            if(apiTodoList.length == 0){
+                await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
+                setToDoList([{
+                    checked: false,
+                    content: ''
+                }])
+                console.log(2)
+                await dispatch(fetchCalendatList({today, chooseDate}))
+                return;
+            }
             // 기존 스케줄만 있을 때 투 두 리스트 첫 추가
             if(apiScheduleList?.length > 0 && apiTodoList == undefined && toDoList[0].content != ''){
                 await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList}))
@@ -116,7 +142,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(4)
                 return;
             }
             // 기존 투 두 리스트만 있을 때 스케줄 첫 추가
@@ -124,7 +149,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                 await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }))
                 setSchedule(['']);
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(5)
                 return;
             }
             // 스케줄, 투 두 리스트 수정
@@ -137,7 +161,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(6)
                 return;
             }
             // 새 스케줄 추가 + 스케줄 추가 && 투 두 리스트 수정
@@ -154,7 +177,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(7)
                 return;
             }
             // 스케줄 수정 + 새 스케줄 추가 && 스케줄 수정 + 추가 + 투 두 리스트 수정
@@ -171,7 +193,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(8)
                 return;
             }
             // 스케줄 추가 + 투 두 리스트 추가
@@ -189,7 +210,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(11)
                 return;
             }
             // 스케줄 수정 + 새 스케줄 추가 + 투 두 리스트 추가
@@ -206,7 +226,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log('스케줄 수정 추가 + 투 두 리스트 추가')
                 return
             }
             // 투 두 리스트 추가
@@ -217,7 +236,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(9)
                 return
             }
             // 투 두 리스트 수정 + 추가 + 스케줄 수정
@@ -235,7 +253,6 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log('리스트 수정 추가 + 스케줄 수정')
                 return
             }
             // 투 두 리스트 수정 + 투 두 리스트 추가 && 스케줄 수정 + 추가 + 투 두 리스트 수정 + 추가
@@ -248,11 +265,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
                     content: ''
                 }])
                 await dispatch(fetchCalendatList({today, chooseDate}))
-                console.log(10)
                 return;
             }
         }
-        console.log(100)
     }
     
     if (isLoading) {
