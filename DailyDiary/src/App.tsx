@@ -25,8 +25,9 @@ function App() {
         nav && (
           <nav className="row w-100 h-100 mt-2 border border-2 border-warning">
             <div className="h-auto mt-2">
-              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
               <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/calendar' onClick={() => setNav(false)}>달력</Link>
+              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/diary' onClick={() => setNav(false)}>일기장</Link>
+              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
             </div>
           </nav>
         )
