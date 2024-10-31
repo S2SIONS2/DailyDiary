@@ -78,10 +78,23 @@ const Diary: React.FC = () => {
                 <ul className='m-0 g-0 p-0'>
                     {sortedData.length > 0 && sortedData.map((item, index) => (
                         <li key={index} 
-                            className="mt-2 w-100 row align-items-center gap-2 p-0 g-0 cursor-pointer border-bottom"
+                            className="mt-2 w-100 row align-items-center p-0 g-0 cursor-pointer border-bottom"
                             onClick={() => diaryDetail(item)}
                         >
-                            <p className='bg-light w-auto p-1 m-0'>{item.emotion} {item.diaryTitle}</p>
+                            <p
+                                className="bg-light w-auto p-1 m-0 g-0"
+                                style={{
+                                    color:
+                                        item.emotion === '행복' ? '#ff48a2' :
+                                        item.emotion === '신남' ? 'orange' :
+                                        item.emotion === '화남' ? 'red' :
+                                        item.emotion === '슬픔' ? 'blue' :
+                                        item.emotion === '후회' ? 'gray' : 'black'
+                                }}
+                            >
+                                [{item.emotion}]
+                            </p>
+                            <p className='bg-light w-auto p-1 m-0 g-0'>{item.diaryTitle}</p>
                         </li>
                     ))}
                 </ul>
