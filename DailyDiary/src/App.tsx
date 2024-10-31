@@ -27,7 +27,11 @@ function App() {
             <div className="h-auto mt-2">
               <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/calendar' onClick={() => setNav(false)}>달력</Link>
               <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/diary' onClick={() => setNav(false)}>일기장</Link>
-              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/bookdiary' onClick={() => setNav(false)}>독서록</Link>
+              <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/bookdiary' 
+                onClick={() => {
+                  setNav(false);
+                  setTimeout(() => {window.location.reload()}, 0); }} // api 달력 무한 새로고침 방지용
+                  >독서록</Link>
             </div>
           </nav>
         )
