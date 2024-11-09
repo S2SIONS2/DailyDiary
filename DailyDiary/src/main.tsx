@@ -16,6 +16,7 @@ import CalendarPage from './pages/CalendarPage.tsx'
 import Diary from './pages/Diary.tsx'
 import WriteDiary from './pages/WriteDiary.tsx'
 import DiaryDetail from './pages/DiaryDetail.tsx'
+import ChartPage from './pages/ChartPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='diary' element={<Diary />} />
           <Route path='writediary' element={<WriteDiary />} />
           <Route path='diarydetail' element={<DiaryDetail />} />
+          <Route path='chart' element={<ChartPage />} />
         </Route>
         <Route path='/nodata' element={<NoData />} />
         <Route path='/loading' element={<Loading />} />
