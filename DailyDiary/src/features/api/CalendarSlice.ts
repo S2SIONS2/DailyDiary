@@ -109,15 +109,6 @@ const url = 'http://175.212.136.236:8081/calendar';
 
 // 비동기 액션 생성
 // api get
-// 단순 호출
-export const fetchCalendar = createAsyncThunk(
-    'calendars/fetchCalendar',
-    async() => {
-        const response = await axios.get(url)
-        return response.data;
-    }
-)
-// 날짜용
 export const fetchCalendatList = createAsyncThunk(
     'calendars/fetchCalendatList',
     async ({today, chooseDate} : SearchLists) => {
@@ -306,16 +297,6 @@ const scheduleSlice = createSlice({
     extraReducers: (builder) => {
         builder
             // 리스트 불러옴 
-            .addCase(fetchCalendar.pending, (state) => {
-                state.status = 'loading'
-            })
-            .addCase(fetchCalendar.fulfilled, (state, action) => {
-                state.status = 'idle';
-                state.date = action.payload[0]?.date;
-                state.id = action.payload[0]?.id;
-                state.scheduleList = action.payload[0]?.schedule ;
-                state.todoList = action.payload[0]?.todoList; 
-            })
             .addCase(fetchCalendatList.pending, (state) => {
                 state.status = 'loading'
             })

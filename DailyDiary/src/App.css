@@ -27,7 +27,6 @@ input[type="checkbox"]{
     padding: 0.5rem;
     box-sizing: border-box;
     margin-top: 15px;
-    min-height: 500px;
 }
 
 *{
