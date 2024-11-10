@@ -32,7 +32,7 @@ function App() {
                   setNav(false);
                   setTimeout(() => {window.location.reload()}, 0); }} // api 달력 무한 새로고침 방지용
                   >독서록</Link>
-                {/* <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/chart' onClick={() => setNav(false)}>통계</Link> */}
+                <Link className="row align-items-center justify-content-end m-0 border-bottom border-warning mb-2" to='/app/chart' onClick={() => setNav(false)}>통계</Link>
             </div>
           </nav>
         )

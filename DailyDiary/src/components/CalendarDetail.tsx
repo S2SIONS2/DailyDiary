@@ -172,9 +172,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
           !hasToDoList
         ) {
           // 스케줄 수정 및 추가, 투두 리스트 수정
-          await dispatch(
-            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
-          );
+          await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule }));
           await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList }));
         } else if (
           hasApiScheduleList &&
@@ -184,9 +182,8 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
           !isTodoChanged
         ) {
           // 스케줄 및 투두 리스트 추가
-          await dispatch(
-            updateSchedule({ apiID, apiDate, apiScheduleList, schedule })
-          );
+          console.log(8)
+          await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }));
           await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
         } else if (
           hasApiScheduleList &&
@@ -195,9 +192,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
           hasToDoList
         ) {
           // 스케줄 수정 및 추가, 투두 리스트 추가
-          await dispatch(
-            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
-          );
+          await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule }));
           await dispatch(updateTodos({ apiID, apiDate, apiTodoList, toDoList }));
         } else if (hasApiTodoList && hasToDoList && !isTodoChanged && !isScheduleChanged) {
           // 투두 리스트 추가
@@ -214,9 +209,7 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
           await dispatch(correctSchedule({ apiID, apiDate, correctionSchedule }));
         } else if (hasApiTodoList && correctionTodos && hasToDoList) {
           // 스케줄 및 투두 리스트 수정 및 추가
-          await dispatch(
-            newSchedule({ apiID, apiDate, correctionSchedule, schedule })
-          );
+          await dispatch(newSchedule({ apiID, apiDate, correctionSchedule, schedule }));
           await dispatch(newTodo({ apiID, apiDate, correctionTodos, toDoList }));
         } else if (
           (!hasApiScheduleList || apiScheduleList.length === 0) &&
@@ -228,7 +221,9 @@ const CalendarDetail: React.FC<CalendarDetailProps> = ({ selectedDate }) => {
         }else if(isTodoChanged && !isScheduleChanged && !hasSchedule && !hasToDoList) {
           // 투 두 리스트 수정 시
           await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList}))
-        } else if (!hasApiScheduleList || apiScheduleList.length === 0) {
+        } else if(correctionTodos && toDoList){
+          await dispatch(correctTodo({ apiID, apiDate, correctionTodos, toDoList }));
+        }else if (!hasApiScheduleList || apiScheduleList.length === 0) {
           // 기존 데이터 삭제 후 스케줄이 비어있을 때 스케줄 추가
           await dispatch(updateSchedule({ apiID, apiDate, apiScheduleList, schedule }));
         } else if (!hasApiTodoList || apiTodoList.length === 0) {

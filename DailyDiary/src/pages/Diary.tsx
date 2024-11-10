@@ -21,7 +21,7 @@ const Diary: React.FC = () => {
     const handleAnalysis = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setAnalysis(e.target.value);
     }
-    const [sortedData, setSortedData] = useState<Diary[]>([]);
+    const [sortedData, setSortedData] = useState<Diary[]>(diaryData);
     const sortData = () => {
         if(analysis === 'date'){
             const newSortedData = [...diaryData]
